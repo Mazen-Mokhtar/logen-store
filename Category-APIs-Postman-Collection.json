@@ -1,0 +1,566 @@
+{
+	"info": {
+		"_postman_id": "category-apis-collection-2024",
+		"name": "Category Management APIs - مجموعة APIs إدارة الفئات",
+		"description": "مجموعة شاملة لاختبار APIs إدارة الفئات في النظام\n\n## المميزات:\n- إدارة الفئات (إنشاء، تحديث، حذف)\n- استعلام الفئات مع الفلاتر والبحث\n- رفع الصور للفئات\n- اختبارات شاملة للأخطاء\n- مصادقة JWT\n\n## المتغيرات المطلوبة:\n- baseUrl: رابط الـ API الأساسي\n- authToken: توكن المصادقة\n- categoryId: معرف الفئة للاختبار\n\n## أنواع الفئات المدعومة:\n- headphones: السماعات\n- keyboards: لوحات المفاتيح\n- mice: الفئران\n- monitors: الشاشات\n- accessories: الإكسسوارات",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "📁 Category Management - إدارة الفئات",
+			"item": [
+				{
+					"name": "✅ Create Category - إنشاء فئة",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text",
+								"description": "JWT Authentication Token"
+							},
+							{
+								"key": "X-API-Version",
+								"value": "v1",
+								"type": "text",
+								"description": "API Version Header"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "سماعات الألعاب",
+									"type": "text",
+									"description": "اسم الفئة (2-90 حرف)"
+								},
+								{
+									"key": "type",
+									"value": "headphones",
+									"type": "text",
+									"description": "نوع الفئة: headphones, keyboards, mice, monitors, accessories"
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"description": "صورة الفئة (مطلوبة)"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/category",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"category"
+							]
+						},
+						"description": "إنشاء فئة جديدة مع رفع صورة\n\n**المتطلبات:**\n- مصادقة JWT\n- صلاحيات Admin أو Super Admin\n- رفع ملف صورة\n- اسم فريد للفئة\n\n**البيانات المطلوبة:**\n- name: اسم الفئة (2-90 حرف)\n- type: نوع الفئة (اختياري، افتراضي: accessories)\n- file: ملف الصورة (مطلوب)"
+					},
+					"response": []
+				},
+				{
+					"name": "📝 Update Category - تحديث فئة",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text",
+								"description": "JWT Authentication Token"
+							},
+							{
+								"key": "X-API-Version",
+								"value": "v1",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "ألعاب الأكشن المحدثة",
+									"type": "text",
+									"description": "الاسم الجديد للفئة (اختياري)"
+								},
+								{
+									"key": "type",
+									"value": "keyboards",
+									"type": "text",
+									"description": "النوع الجديد للفئة (اختياري)"
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"description": "صورة جديدة للفئة (اختياري)"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/category/update/{{categoryId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"category",
+								"update",
+								"{{categoryId}}"
+							]
+						},
+						"description": "تحديث فئة موجودة\n\n**المتطلبات:**\n- مصادقة JWT\n- صلاحيات Admin أو Super Admin\n- معرف فئة صحيح\n\n**البيانات الاختيارية:**\n- name: اسم جديد للفئة\n- type: نوع جديد للفئة\n- file: صورة جديدة"
+					},
+					"response": []
+				},
+				{
+					"name": "🗑️ Delete Category - حذف فئة",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text",
+								"description": "JWT Authentication Token"
+							},
+							{
+								"key": "X-API-Version",
+								"value": "v1",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/category/{{categoryId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"category",
+								"{{categoryId}}"
+							]
+						},
+						"description": "حذف فئة من النظام\n\n**المتطلبات:**\n- مصادقة JWT\n- صلاحيات Admin أو Super Admin\n- معرف فئة صحيح\n\n**ملاحظة:** سيتم حذف صورة الفئة من التخزين السحابي أيضاً"
+					},
+					"response": []
+				}
+			],
+			"description": "العمليات الأساسية لإدارة الفئات - إنشاء، تحديث، وحذف الفئات"
+		},
+		{
+			"name": "🔍 Category Queries - استعلام الفئات",
+			"item": [
+				{
+					"name": "📋 Get All Categories - جميع الفئات",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-API-Version",
+								"value": "v1",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/category/AllCategory?page=1&limit=10&search=سماعات&type=headphones&sort=-createdAt",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"category",
+								"AllCategory"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "رقم الصفحة للترقيم"
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "عدد العناصر في الصفحة"
+								},
+								{
+									"key": "search",
+									"value": "ألعاب",
+									"description": "البحث في اسم الفئة"
+								},
+								{
+									"key": "type",
+									"value": "headphones",
+									"description": "فلترة حسب نوع الفئة"
+								},
+								{
+									"key": "sort",
+									"value": "-createdAt",
+									"description": "ترتيب النتائج"
+								}
+							]
+						},
+						"description": "الحصول على جميع الفئات مع إمكانية الفلترة والبحث\n\n**المعاملات الاختيارية:**\n- page: رقم الصفحة (افتراضي: 1)\n- limit: عدد العناصر (افتراضي: 10)\n- search: البحث في اسم الفئة\n- type: فلترة حسب النوع (headphones, keyboards, mice, monitors, accessories)\n- sort: ترتيب النتائج\n\n**لا يتطلب مصادقة**"
+					},
+					"response": []
+				},
+				{
+					"name": "🎯 Get Category by ID - فئة بالمعرف",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-API-Version",
+								"value": "v1",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/category/{{categoryId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"category",
+								"{{categoryId}}"
+							]
+						},
+						"description": "الحصول على فئة محددة بمعرفها\n\n**المتطلبات:**\n- معرف فئة صحيح (MongoDB ObjectId)\n\n**المعلومات المُرجعة:**\n- تفاصيل الفئة كاملة\n- معلومات منشئ الفئة\n- صورة الفئة\n\n**لا يتطلب مصادقة**"
+					},
+					"response": []
+				}
+			],
+			"description": "عمليات الاستعلام والبحث في الفئات"
+		},
+		{
+			"name": "🧪 Test Scenarios - سيناريوهات الاختبار",
+			"item": [
+				{
+					"name": "❌ Create Category - Missing File",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							},
+							{
+								"key": "X-API-Version",
+								"value": "v1",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "فئة بدون صورة",
+									"type": "text"
+								},
+								{
+									"key": "type",
+									"value": "mice",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/category",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"category"
+							]
+						},
+						"description": "اختبار إنشاء فئة بدون رفع صورة\n\n**النتيجة المتوقعة:**\n- كود الخطأ: 400\n- الرسالة: Missing file\n\n**الغرض:** التأكد من إجبارية رفع الصورة"
+					},
+					"response": []
+				},
+				{
+					"name": "❌ Create Category - Duplicate Name",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							},
+							{
+								"key": "X-API-Version",
+								"value": "v1",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "ألعاب الأكشن",
+									"type": "text",
+									"description": "اسم مكرر موجود مسبقاً"
+								},
+								{
+									"key": "type",
+									"value": "monitors",
+									"type": "text"
+								},
+								{
+									"key": "file",
+									"type": "file"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/category",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"category"
+							]
+						},
+						"description": "اختبار إنشاء فئة باسم مكرر\n\n**النتيجة المتوقعة:**\n- كود الخطأ: 409\n- الرسالة: name already exist\n\n**الغرض:** التأكد من فرادة أسماء الفئات"
+					},
+					"response": []
+				},
+				{
+					"name": "❌ Get Category - Invalid ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-API-Version",
+								"value": "v1",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/category/invalid-id-format",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"category",
+								"invalid-id-format"
+							]
+						},
+						"description": "اختبار الحصول على فئة بمعرف غير صحيح\n\n**النتيجة المتوقعة:**\n- كود الخطأ: 400\n- الرسالة: Invalid category ID format\n\n**الغرض:** التحقق من صحة تنسيق المعرف"
+					},
+					"response": []
+				},
+				{
+					"name": "❌ Get Category - Not Found",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-API-Version",
+								"value": "v1",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/category/507f1f77bcf86cd799439011",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"category",
+								"507f1f77bcf86cd799439011"
+							]
+						},
+						"description": "اختبار الحصول على فئة غير موجودة\n\n**النتيجة المتوقعة:**\n- كود الخطأ: 404\n- الرسالة: Not found Category\n\n**الغرض:** التحقق من التعامل مع الفئات غير الموجودة"
+					},
+					"response": []
+				},
+				{
+					"name": "❌ Unauthorized Access - No Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-API-Version",
+								"value": "v1",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "فئة بدون مصادقة",
+									"type": "text"
+								},
+								{
+									"key": "type",
+									"value": "accessories",
+									"type": "text"
+								},
+								{
+									"key": "file",
+									"type": "file"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/category",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"category"
+							]
+						},
+						"description": "اختبار الوصول بدون توكن مصادقة\n\n**النتيجة المتوقعة:**\n- كود الخطأ: 401\n- الرسالة: Unauthorized - Authentication required\n\n**الغرض:** التأكد من حماية العمليات المحظورة"
+					},
+					"response": []
+				},
+				{
+					"name": "❌ Invalid Category Type",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							},
+							{
+								"key": "X-API-Version",
+								"value": "v1",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "فئة بنوع خاطئ",
+									"type": "text"
+								},
+								{
+									"key": "type",
+									"value": "invalid_type",
+									"type": "text",
+									"description": "نوع غير مدعوم"
+								},
+								{
+									"key": "file",
+									"type": "file"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/category",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"category"
+							]
+						},
+						"description": "اختبار إنشاء فئة بنوع غير مدعوم\n\n**النتيجة المتوقعة:**\n- كود الخطأ: 400\n- رسالة تحقق من صحة البيانات\n\n**الأنواع المدعومة:** headphones, keyboards, mice, monitors, accessories"
+					},
+					"response": []
+				}
+			],
+			"description": "سيناريوهات اختبار مختلفة للتأكد من صحة عمل النظام وإدارة الأخطاء"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// تعيين متغيرات افتراضية إذا لم تكن موجودة",
+					"if (!pm.collectionVariables.get('baseUrl')) {",
+					"    pm.collectionVariables.set('baseUrl', 'http://localhost:3000/api/v1');",
+					"}",
+					"",
+					"// إنشاء معرف فئة تجريبي للاختبار",
+					"if (!pm.collectionVariables.get('categoryId')) {",
+					"    pm.collectionVariables.set('categoryId', '507f1f77bcf86cd799439012');",
+					"}",
+					"",
+					"// طباعة معلومات الطلب للتتبع",
+					"console.log('🚀 إرسال طلب إلى:', pm.request.url.toString());",
+					"console.log('📝 طريقة الطلب:', pm.request.method);"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// اختبارات عامة لجميع الطلبات",
+					"pm.test('✅ الاستجابة في وقت مناسب', function () {",
+					"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+					"});",
+					"",
+					"pm.test('📊 تنسيق الاستجابة JSON', function () {",
+					"    pm.response.to.have.header('Content-Type');",
+					"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+					"});",
+					"",
+					"// اختبارات خاصة بالعمليات الناجحة",
+					"if (pm.response.code >= 200 && pm.response.code < 300) {",
+					"    pm.test('🎉 العملية نجحت', function () {",
+					"        pm.response.to.have.status(pm.response.code);",
+					"    });",
+					"    ",
+					"    // حفظ معرف الفئة المُنشأة للاستخدام في الطلبات التالية",
+					"    if (pm.request.method === 'POST' && pm.request.url.path.includes('category')) {",
+					"        const responseJson = pm.response.json();",
+					"        if (responseJson.data && responseJson.data._id) {",
+					"            pm.collectionVariables.set('categoryId', responseJson.data._id);",
+					"            console.log('💾 تم حفظ معرف الفئة:', responseJson.data._id);",
+					"        }",
+					"    }",
+					"}",
+					"",
+					"// اختبارات خاصة بالأخطاء",
+					"if (pm.response.code >= 400) {",
+					"    pm.test('⚠️ رسالة خطأ واضحة', function () {",
+					"        const responseJson = pm.response.json();",
+					"        pm.expect(responseJson).to.have.property('message');",
+					"    });",
+					"}",
+					"",
+					"// طباعة نتيجة الاختبار",
+					"console.log('📋 كود الاستجابة:', pm.response.code);",
+					"console.log('⏱️ وقت الاستجابة:', pm.response.responseTime + 'ms');"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000/api/v1",
+			"type": "string",
+			"description": "رابط الـ API الأساسي"
+		},
+		{
+			"key": "authToken",
+			"value": "your-jwt-token-here",
+			"type": "string",
+			"description": "توكن المصادقة JWT - احصل عليه من Login API"
+		},
+		{
+			"key": "categoryId",
+			"value": "507f1f77bcf86cd799439012",
+			"type": "string",
+			"description": "معرف الفئة للاختبار - سيتم تحديثه تلقائياً عند إنشاء فئة جديدة"
+		}
+	]
+}

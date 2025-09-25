@@ -1,0 +1,490 @@
+{
+	"info": {
+		"_postman_id": "order-apis-collection-2024",
+		"name": "Order APIs Collection",
+		"description": "مجموعة شاملة لواجهات برمجة التطبيقات الخاصة بالطلبات\nComprehensive collection for Order APIs including user orders, admin management, and checkout functionality",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{authToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000/api",
+			"type": "string",
+			"description": "Base URL for the API"
+		},
+		{
+			"key": "authToken",
+			"value": "",
+			"type": "string",
+			"description": "JWT Authentication token"
+		},
+		{
+			"key": "orderId",
+			"value": "",
+			"type": "string",
+			"description": "Order ID for testing"
+		},
+		{
+			"key": "userId",
+			"value": "",
+			"type": "string",
+			"description": "User ID for admin operations"
+		},
+		{
+			"key": "couponCode",
+			"value": "",
+			"type": "string",
+			"description": "Coupon code for discounts"
+		}
+	],
+	"item": [
+		{
+			"name": "Order Management",
+			"description": "إدارة الطلبات - Order management endpoints",
+			"item": [
+				{
+					"name": "Create Order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-API-Version",
+								"value": "v1"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productId\": \"product123\",\n  \"productName\": \"Sample Product\",\n  \"totalAmount\": 100,\n  \"currency\": \"EGP\",\n  \"paymentMethod\": \"card\",\n  \"couponCode\": \"{{couponCode}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/order",
+							"host": ["{{baseUrl}}"],
+							"path": ["order"]
+						},
+						"description": "إنشاء طلب جديد - Create a new order with coupon support"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Cart Order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-API-Version",
+								"value": "v1"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"shippingInfo\": {\n    \"firstName\": \"أحمد\",\n    \"lastName\": \"محمد\",\n    \"email\": \"ahmed@example.com\",\n    \"phone\": \"+201234567890\",\n    \"address\": \"123 شارع النيل\",\n    \"city\": \"القاهرة\",\n    \"postalCode\": \"12345\"\n  },\n  \"paymentMethod\": \"card\",\n  \"currency\": \"EGP\",\n  \"couponCode\": \"{{couponCode}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/order/cart",
+							"host": ["{{baseUrl}}"],
+							"path": ["order", "cart"]
+						},
+						"description": "إنشاء طلب من السلة - Create order from cart items"
+					},
+					"response": []
+				},
+				{
+					"name": "Checkout Order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/order/{{orderId}}/checkout",
+							"host": ["{{baseUrl}}"],
+							"path": ["order", "{{orderId}}", "checkout"]
+						},
+						"description": "معالجة الدفع للطلب - Process checkout for an order"
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Order",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/order/{{orderId}}/cancel",
+							"host": ["{{baseUrl}}"],
+							"path": ["order", "{{orderId}}", "cancel"]
+						},
+						"description": "إلغاء الطلب - Cancel an order (Super Admin only)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Order Queries",
+			"description": "استعلامات الطلبات - Order query endpoints",
+			"item": [
+				{
+					"name": "Get User Orders",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-API-Version",
+								"value": "v1"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/order?page=1&limit=10&status=pending",
+							"host": ["{{baseUrl}}"],
+							"path": ["order"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number"
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Items per page"
+								},
+								{
+									"key": "status",
+									"value": "pending",
+									"description": "Filter by status"
+								},
+								{
+									"key": "paymentStatus",
+									"value": "",
+									"description": "Filter by payment status",
+									"disabled": true
+								},
+								{
+									"key": "startDate",
+									"value": "",
+									"description": "Start date filter",
+									"disabled": true
+								},
+								{
+									"key": "endDate",
+									"value": "",
+									"description": "End date filter",
+									"disabled": true
+								},
+								{
+									"key": "search",
+									"value": "",
+									"description": "Search in product name",
+									"disabled": true
+								}
+							]
+						},
+						"description": "الحصول على طلبات المستخدم - Get user's orders with filtering"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/order/{{orderId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["order", "{{orderId}}"]
+						},
+						"description": "الحصول على تفاصيل الطلب - Get detailed order information"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Admin Operations",
+			"description": "عمليات الإدارة - Admin management endpoints",
+			"item": [
+				{
+					"name": "Get All Orders (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/order/admin/all?page=1&limit=20&status=pending",
+							"host": ["{{baseUrl}}"],
+							"path": ["order", "admin", "all"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number"
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Items per page"
+								},
+								{
+									"key": "status",
+									"value": "pending",
+									"description": "Filter by status"
+								},
+								{
+									"key": "userId",
+									"value": "",
+									"description": "Filter by user ID",
+									"disabled": true
+								},
+								{
+									"key": "search",
+									"value": "",
+									"description": "Search orders",
+									"disabled": true
+								}
+							]
+						},
+						"description": "الحصول على جميع الطلبات - Get all orders for admin dashboard"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order by ID (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/order/admin/{{orderId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["order", "admin", "{{orderId}}"]
+						},
+						"description": "الحصول على الطلب بالمعرف - Get order by ID for admin"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Order Status (Admin)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"delivered\",\n  \"adminNote\": \"تم التسليم بنجاح\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/order/admin/{{orderId}}/status",
+							"host": ["{{baseUrl}}"],
+							"path": ["order", "admin", "{{orderId}}", "status"]
+						},
+						"description": "تحديث حالة الطلب - Update order status"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order Statistics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/order/admin/stats",
+							"host": ["{{baseUrl}}"],
+							"path": ["order", "admin", "stats"]
+						},
+						"description": "إحصائيات الطلبات - Get order statistics for dashboard"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Webhooks",
+			"description": "Webhook endpoints for payment processing",
+			"item": [
+				{
+					"name": "Payment Webhook",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Stripe-Signature",
+								"value": "webhook_signature_here"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": \"evt_test_webhook\",\n  \"object\": \"event\",\n  \"type\": \"payment_intent.succeeded\",\n  \"data\": {\n    \"object\": {\n      \"id\": \"pi_test_payment_intent\",\n      \"metadata\": {\n        \"orderId\": \"{{orderId}}\"\n      }\n    }\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/order/webhook",
+							"host": ["{{baseUrl}}"],
+							"path": ["order", "webhook"]
+						},
+						"description": "معالجة webhook للدفع - Handle payment webhook notifications"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Test Scenarios",
+			"description": "سيناريوهات الاختبار - Test scenarios for error handling",
+			"item": [
+				{
+					"name": "Create Order - Invalid Data",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productName\": \"\",\n  \"totalAmount\": -100,\n  \"currency\": \"INVALID\",\n  \"paymentMethod\": \"invalid_method\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/order",
+							"host": ["{{baseUrl}}"],
+							"path": ["order"]
+						},
+						"description": "اختبار بيانات غير صحيحة - Test with invalid order data"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order - Not Found",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/order/507f1f77bcf86cd799439011",
+							"host": ["{{baseUrl}}"],
+							"path": ["order", "507f1f77bcf86cd799439011"]
+						},
+						"description": "اختبار طلب غير موجود - Test with non-existent order ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Checkout - Invalid Order",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/order/507f1f77bcf86cd799439011/checkout",
+							"host": ["{{baseUrl}}"],
+							"path": ["order", "507f1f77bcf86cd799439011", "checkout"]
+						},
+						"description": "اختبار دفع لطلب غير صحيح - Test checkout with invalid order"
+					},
+					"response": []
+				},
+				{
+					"name": "Unauthorized Access",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"auth": {
+							"type": "noauth"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/order",
+							"host": ["{{baseUrl}}"],
+							"path": ["order"]
+						},
+						"description": "اختبار الوصول بدون تصريح - Test unauthorized access"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Auto-generate order ID for testing",
+					"if (!pm.collectionVariables.get('orderId')) {",
+					"    pm.collectionVariables.set('orderId', '507f1f77bcf86cd799439012');",
+					"}",
+					"",
+					"// Set default headers",
+					"pm.request.headers.add({",
+					"    key: 'Accept',",
+					"    value: 'application/json'",
+					"});"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Auto tests for successful responses",
+					"pm.test('Response time is less than 2000ms', function () {",
+					"    pm.expect(pm.response.responseTime).to.be.below(2000);",
+					"});",
+					"",
+					"pm.test('Response has correct content type', function () {",
+					"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+					"});",
+					"",
+					"// Extract order ID from successful create operations",
+					"if (pm.response.code === 201 && pm.response.json().data && pm.response.json().data._id) {",
+					"    pm.collectionVariables.set('orderId', pm.response.json().data._id);",
+					"    console.log('Order ID saved:', pm.response.json().data._id);",
+					"}",
+					"",
+					"// Status code tests",
+					"if (pm.request.url.toString().includes('/order') && pm.request.method === 'POST') {",
+					"    pm.test('Order creation returns 201', function () {",
+					"        pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+					"    });",
+					"} else if (pm.request.method === 'GET') {",
+					"    pm.test('GET request returns 200', function () {",
+					"        pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
+					"    });",
+					"}"
+				]
+			}
+		}
+	]
+}

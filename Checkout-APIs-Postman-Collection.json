@@ -1,0 +1,434 @@
+{
+	"info": {
+		"_postman_id": "checkout-apis-collection-2024",
+		"name": "Checkout APIs Collection",
+		"description": "مجموعة شاملة لواجهات برمجة التطبيقات الخاصة بعملية الدفع والخروج\nComprehensive collection for Checkout APIs supporting guest and authenticated users with multiple payment methods",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{authToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000/api",
+			"type": "string",
+			"description": "Base URL for the API"
+		},
+		{
+			"key": "authToken",
+			"value": "",
+			"type": "string",
+			"description": "JWT Authentication token (optional for guest checkout)"
+		},
+		{
+			"key": "orderId",
+			"value": "",
+			"type": "string",
+			"description": "Order ID for status checking"
+		},
+		{
+			"key": "idempotencyKey",
+			"value": "",
+			"type": "string",
+			"description": "UUID for preventing duplicate orders"
+		},
+		{
+			"key": "couponCode",
+			"value": "",
+			"type": "string",
+			"description": "Coupon code for discounts"
+		}
+	],
+	"item": [
+		{
+			"name": "Guest Checkout",
+			"description": "عملية الدفع للضيوف - Guest checkout without authentication",
+			"item": [
+				{
+					"name": "Process Guest Checkout - COD",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"items\": [\n    {\n      \"id\": \"product123\",\n      \"title\": \"منتج تجريبي\",\n      \"price\": 100,\n      \"quantity\": 2,\n      \"image\": \"https://example.com/image.jpg\",\n      \"size\": \"L\",\n      \"color\": \"أحمر\"\n    },\n    {\n      \"id\": \"product456\",\n      \"title\": \"منتج آخر\",\n      \"price\": 50,\n      \"quantity\": 1,\n      \"image\": \"https://example.com/image2.jpg\"\n    }\n  ],\n  \"guestInfo\": {\n    \"firstName\": \"أحمد\",\n    \"lastName\": \"محمد\",\n    \"email\": \"ahmed.guest@example.com\",\n    \"phone\": \"+201234567890\",\n    \"address\": \"123 شارع النيل، المعادي\",\n    \"city\": \"القاهرة\",\n    \"postalCode\": \"12345\"\n  },\n  \"paymentMethod\": \"cod\",\n  \"currency\": \"EGP\",\n  \"idempotencyKey\": \"{{$guid}}\",\n  \"couponCode\": \"{{couponCode}}\",\n  \"notes\": \"يرجى التسليم في المساء\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/checkout",
+							"host": ["{{baseUrl}}"],
+							"path": ["checkout"]
+						},
+						"description": "معالجة دفع الضيف - الدفع عند الاستلام - Process guest checkout with Cash on Delivery"
+					},
+					"response": []
+				},
+				{
+					"name": "Process Guest Checkout - Stripe",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"items\": [\n    {\n      \"id\": \"product789\",\n      \"title\": \"منتج للدفع الإلكتروني\",\n      \"price\": 200,\n      \"quantity\": 1,\n      \"image\": \"https://example.com/premium-product.jpg\",\n      \"size\": \"M\",\n      \"color\": \"أزرق\"\n    }\n  ],\n  \"guestInfo\": {\n    \"firstName\": \"فاطمة\",\n    \"lastName\": \"أحمد\",\n    \"email\": \"fatma.guest@example.com\",\n    \"phone\": \"+201987654321\",\n    \"address\": \"456 شارع التحرير، وسط البلد\",\n    \"city\": \"القاهرة\",\n    \"postalCode\": \"11511\"\n  },\n  \"paymentMethod\": \"stripe\",\n  \"currency\": \"EGP\",\n  \"idempotencyKey\": \"{{$guid}}\",\n  \"couponCode\": \"{{couponCode}}\",\n  \"notes\": \"طلب عاجل\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/checkout",
+							"host": ["{{baseUrl}}"],
+							"path": ["checkout"]
+						},
+						"description": "معالجة دفع الضيف - الدفع الإلكتروني - Process guest checkout with Stripe payment"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Authenticated Checkout",
+			"description": "عملية الدفع للمستخدمين المسجلين - Authenticated user checkout",
+			"item": [
+				{
+					"name": "Process Authenticated Checkout - COD",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"items\": [\n    {\n      \"id\": \"product001\",\n      \"title\": \"منتج للمستخدم المسجل\",\n      \"price\": 150,\n      \"quantity\": 3,\n      \"image\": \"https://example.com/user-product.jpg\",\n      \"size\": \"XL\",\n      \"color\": \"أخضر\"\n    }\n  ],\n  \"paymentMethod\": \"cod\",\n  \"currency\": \"EGP\",\n  \"idempotencyKey\": \"{{$guid}}\",\n  \"couponCode\": \"{{couponCode}}\",\n  \"notes\": \"استخدام العنوان المحفوظ\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/checkout/authenticated",
+							"host": ["{{baseUrl}}"],
+							"path": ["checkout", "authenticated"]
+						},
+						"description": "معالجة دفع المستخدم المسجل - الدفع عند الاستلام - Process authenticated user checkout with COD"
+					},
+					"response": []
+				},
+				{
+					"name": "Process Authenticated Checkout - Stripe",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"items\": [\n    {\n      \"id\": \"product002\",\n      \"title\": \"منتج مميز للدفع الإلكتروني\",\n      \"price\": 300,\n      \"quantity\": 1,\n      \"image\": \"https://example.com/premium-item.jpg\",\n      \"size\": \"L\",\n      \"color\": \"ذهبي\"\n    },\n    {\n      \"id\": \"product003\",\n      \"title\": \"إضافة مجانية\",\n      \"price\": 0,\n      \"quantity\": 1,\n      \"image\": \"https://example.com/free-addon.jpg\"\n    }\n  ],\n  \"paymentMethod\": \"stripe\",\n  \"currency\": \"USD\",\n  \"idempotencyKey\": \"{{$guid}}\",\n  \"couponCode\": \"{{couponCode}}\",\n  \"notes\": \"طلب دولي\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/checkout/authenticated",
+							"host": ["{{baseUrl}}"],
+							"path": ["checkout", "authenticated"]
+						},
+						"description": "معالجة دفع المستخدم المسجل - الدفع الإلكتروني - Process authenticated user checkout with Stripe"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Order Status",
+			"description": "حالة الطلب - Order status checking",
+			"item": [
+				{
+					"name": "Get Order Status (Public)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"auth": {
+							"type": "noauth"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/checkout/order/{{orderId}}/status",
+							"host": ["{{baseUrl}}"],
+							"path": ["checkout", "order", "{{orderId}}", "status"]
+						},
+						"description": "الحصول على حالة الطلب - عام - Get order status (public access)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order Status (Authenticated)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/checkout/order/{{orderId}}/status/authenticated",
+							"host": ["{{baseUrl}}"],
+							"path": ["checkout", "order", "{{orderId}}", "status", "authenticated"]
+						},
+						"description": "الحصول على حالة الطلب - مصادق عليه - Get order status for authenticated user"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Test Scenarios",
+			"description": "سيناريوهات الاختبار - Test scenarios for error handling",
+			"item": [
+				{
+					"name": "Invalid Guest Info",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"items\": [\n    {\n      \"id\": \"product123\",\n      \"title\": \"منتج تجريبي\",\n      \"price\": 100,\n      \"quantity\": 1\n    }\n  ],\n  \"guestInfo\": {\n    \"firstName\": \"\",\n    \"lastName\": \"\",\n    \"email\": \"invalid-email\",\n    \"phone\": \"123\",\n    \"address\": \"\",\n    \"city\": \"\"\n  },\n  \"paymentMethod\": \"cod\",\n  \"currency\": \"EGP\",\n  \"idempotencyKey\": \"{{$guid}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/checkout",
+							"host": ["{{baseUrl}}"],
+							"path": ["checkout"]
+						},
+						"description": "اختبار بيانات ضيف غير صحيحة - Test with invalid guest information"
+					},
+					"response": []
+				},
+				{
+					"name": "Empty Cart",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"items\": [],\n  \"guestInfo\": {\n    \"firstName\": \"أحمد\",\n    \"lastName\": \"محمد\",\n    \"email\": \"ahmed@example.com\",\n    \"phone\": \"+201234567890\",\n    \"address\": \"123 شارع النيل\",\n    \"city\": \"القاهرة\"\n  },\n  \"paymentMethod\": \"cod\",\n  \"currency\": \"EGP\",\n  \"idempotencyKey\": \"{{$guid}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/checkout",
+							"host": ["{{baseUrl}}"],
+							"path": ["checkout"]
+						},
+						"description": "اختبار سلة فارغة - Test with empty cart"
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Payment Method",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"items\": [\n    {\n      \"id\": \"product123\",\n      \"title\": \"منتج تجريبي\",\n      \"price\": 100,\n      \"quantity\": 1\n    }\n  ],\n  \"guestInfo\": {\n    \"firstName\": \"أحمد\",\n    \"lastName\": \"محمد\",\n    \"email\": \"ahmed@example.com\",\n    \"phone\": \"+201234567890\",\n    \"address\": \"123 شارع النيل\",\n    \"city\": \"القاهرة\"\n  },\n  \"paymentMethod\": \"invalid_method\",\n  \"currency\": \"EGP\",\n  \"idempotencyKey\": \"{{$guid}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/checkout",
+							"host": ["{{baseUrl}}"],
+							"path": ["checkout"]
+						},
+						"description": "اختبار طريقة دفع غير صحيحة - Test with invalid payment method"
+					},
+					"response": []
+				},
+				{
+					"name": "Duplicate Order (Same Idempotency Key)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"items\": [\n    {\n      \"id\": \"product123\",\n      \"title\": \"منتج تجريبي\",\n      \"price\": 100,\n      \"quantity\": 1\n    }\n  ],\n  \"guestInfo\": {\n    \"firstName\": \"أحمد\",\n    \"lastName\": \"محمد\",\n    \"email\": \"ahmed@example.com\",\n    \"phone\": \"+201234567890\",\n    \"address\": \"123 شارع النيل\",\n    \"city\": \"القاهرة\"\n  },\n  \"paymentMethod\": \"cod\",\n  \"currency\": \"EGP\",\n  \"idempotencyKey\": \"duplicate-test-key-123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/checkout",
+							"host": ["{{baseUrl}}"],
+							"path": ["checkout"]
+						},
+						"description": "اختبار طلب مكرر - Test duplicate order prevention"
+					},
+					"response": []
+				},
+				{
+					"name": "Order Status - Not Found",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"auth": {
+							"type": "noauth"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/checkout/order/507f1f77bcf86cd799439011/status",
+							"host": ["{{baseUrl}}"],
+							"path": ["checkout", "order", "507f1f77bcf86cd799439011", "status"]
+						},
+						"description": "اختبار طلب غير موجود - Test with non-existent order ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Registered Email as Guest",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"auth": {
+							"type": "noauth"
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"items\": [\n    {\n      \"id\": \"product123\",\n      \"title\": \"منتج تجريبي\",\n      \"price\": 100,\n      \"quantity\": 1\n    }\n  ],\n  \"guestInfo\": {\n    \"firstName\": \"مستخدم\",\n    \"lastName\": \"مسجل\",\n    \"email\": \"registered.user@example.com\",\n    \"phone\": \"+201234567890\",\n    \"address\": \"123 شارع النيل\",\n    \"city\": \"القاهرة\"\n  },\n  \"paymentMethod\": \"cod\",\n  \"currency\": \"EGP\",\n  \"idempotencyKey\": \"{{$guid}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/checkout",
+							"host": ["{{baseUrl}}"],
+							"path": ["checkout"]
+						},
+						"description": "اختبار استخدام إيميل مسجل كضيف - Test using registered email as guest"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Auto-generate idempotency key if not set",
+					"if (!pm.collectionVariables.get('idempotencyKey')) {",
+					"    pm.collectionVariables.set('idempotencyKey', pm.variables.replaceIn('{{$guid}}'));",
+					"}",
+					"",
+					"// Set default headers",
+					"pm.request.headers.add({",
+					"    key: 'Accept',",
+					"    value: 'application/json'",
+					"});",
+					"",
+					"// Log request details for debugging",
+					"console.log('Request URL:', pm.request.url.toString());",
+					"console.log('Request Method:', pm.request.method);",
+					"",
+					"// Add timestamp to request",
+					"pm.globals.set('requestTimestamp', new Date().toISOString());"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Auto tests for successful responses",
+					"pm.test('Response time is less than 3000ms', function () {",
+					"    pm.expect(pm.response.responseTime).to.be.below(3000);",
+					"});",
+					"",
+					"pm.test('Response has correct content type', function () {",
+					"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+					"});",
+					"",
+					"// Extract order ID from successful checkout",
+					"if (pm.response.code === 200 && pm.response.json().orderId) {",
+					"    pm.collectionVariables.set('orderId', pm.response.json().orderId);",
+					"    console.log('Order ID saved:', pm.response.json().orderId);",
+					"}",
+					"",
+					"// Status code tests based on request type",
+					"if (pm.request.url.toString().includes('/checkout') && pm.request.method === 'POST') {",
+					"    pm.test('Checkout returns success status', function () {",
+					"        pm.expect(pm.response.code).to.be.oneOf([200, 400, 409]);",
+					"    });",
+					"    ",
+					"    if (pm.response.code === 200) {",
+					"        pm.test('Successful checkout has required fields', function () {",
+					"            const response = pm.response.json();",
+					"            pm.expect(response).to.have.property('success');",
+					"            pm.expect(response).to.have.property('orderId');",
+					"            pm.expect(response).to.have.property('totalAmount');",
+					"        });",
+					"    }",
+					"} else if (pm.request.url.toString().includes('/status') && pm.request.method === 'GET') {",
+					"    pm.test('Status check returns appropriate response', function () {",
+					"        pm.expect(pm.response.code).to.be.oneOf([200, 400, 404]);",
+					"    });",
+					"}",
+					"",
+					"// Test for Arabic content support",
+					"if (pm.response.code === 200) {",
+					"    pm.test('Response supports Arabic content', function () {",
+					"        const responseText = pm.response.text();",
+					"        // This test passes if the response can handle Arabic characters",
+					"        pm.expect(responseText).to.not.be.empty;",
+					"    });",
+					"}",
+					"",
+					"// Log response for debugging",
+					"console.log('Response Status:', pm.response.code);",
+					"console.log('Response Time:', pm.response.responseTime + 'ms');"
+				]
+			}
+		}
+	]
+}

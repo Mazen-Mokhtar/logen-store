@@ -1,0 +1,581 @@
+{
+  "info": {
+    "name": "Product APIs - ZenStore System",
+    "description": "مجموعة شاملة من APIs إدارة المنتجات في نظام ZenStore\n\nتتضمن هذه المجموعة:\n- إنشاء المنتجات مع الصور\n- تحديث المنتجات\n- استعلام المنتجات مع الفلاتر والبحث\n- حذف المنتجات\n- الحصول على منتج واحد\n\nملاحظات مهمة:\n- جميع الـ APIs تتطلب Authentication عبر Bearer Token\n- APIs الإنشاء والتحديث والحذف تتطلب صلاحيات Admin أو Moderator\n- يمكن رفع حتى 10 صور لكل منتج\n- الحد الأقصى لحجم الصورة 5MB",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "product-apis-zenstore-2024",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    }
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{authToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1",
+      "type": "string",
+      "description": "Base URL للـ API"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string",
+      "description": "JWT Token للمصادقة - يجب الحصول عليه من Login API"
+    },
+    {
+      "key": "productId",
+      "value": "",
+      "type": "string",
+      "description": "معرف المنتج المستخدم في الاختبارات"
+    },
+    {
+      "key": "categoryId",
+      "value": "",
+      "type": "string",
+      "description": "معرف الفئة المستخدم في إنشاء المنتجات"
+    }
+  ],
+  "item": [
+    {
+      "name": "📦 Product Management",
+      "description": "مجموعة APIs إدارة المنتجات الأساسية",
+      "item": [
+        {
+          "name": "✅ Create Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "multipart/form-data",
+                "type": "text",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "handle",
+                  "value": "gaming-laptop-{{$randomInt}}",
+                  "type": "text",
+                  "description": "Handle/Slug للمنتج"
+                },
+                {
+                  "key": "title[en]",
+                  "value": "Gaming Laptop Pro Max",
+                  "type": "text",
+                  "description": "العنوان بالإنجليزية"
+                },
+                {
+                  "key": "title[ar]",
+                  "value": "لابتوب الألعاب برو ماكس",
+                  "type": "text",
+                  "description": "العنوان بالعربية"
+                },
+                {
+                  "key": "description[en]",
+                  "value": "High-performance gaming laptop with RTX 4080, 32GB RAM, and 1TB SSD. Perfect for gaming and professional work.",
+                  "type": "text",
+                  "description": "الوصف بالإنجليزية"
+                },
+                {
+                  "key": "description[ar]",
+                  "value": "لابتوب ألعاب عالي الأداء مع RTX 4080 و 32 جيجا رام و 1 تيرا SSD. مثالي للألعاب والعمل المهني.",
+                  "type": "text",
+                  "description": "الوصف بالعربية"
+                },
+                {
+                  "key": "price",
+                  "value": "2499.99",
+                  "type": "text",
+                  "description": "سعر المنتج"
+                },
+                {
+                  "key": "category",
+                  "value": "{{categoryId}}",
+                  "type": "text",
+                  "description": "معرف الفئة"
+                },
+                {
+                  "key": "tags",
+                  "value": "[\"gaming\", \"laptop\", \"high-performance\", \"RTX\"]",
+                  "type": "text",
+                  "description": "العلامات (JSON Array)"
+                },
+                {
+                  "key": "inStock",
+                  "value": "true",
+                  "type": "text",
+                  "description": "حالة التوفر"
+                },
+                {
+                  "key": "promotion[isOnSale]",
+                  "value": "true",
+                  "type": "text",
+                  "description": "هل المنتج في تخفيض"
+                },
+                {
+                  "key": "promotion[originalPrice]",
+                  "value": "2999.99",
+                  "type": "text",
+                  "description": "السعر الأصلي"
+                },
+                {
+                  "key": "promotion[salePrice]",
+                  "value": "2499.99",
+                  "type": "text",
+                  "description": "سعر التخفيض"
+                },
+                {
+                  "key": "promotion[saleEndDate]",
+                  "value": "2024-12-31T23:59:59.000Z",
+                  "type": "text",
+                  "description": "تاريخ انتهاء التخفيض"
+                },
+                {
+                  "key": "sizes",
+                  "value": "[{\"name\": \"15 inch\", \"available\": true}, {\"name\": \"17 inch\", \"available\": true}]",
+                  "type": "text",
+                  "description": "الأحجام المتاحة (JSON Array)"
+                },
+                {
+                  "key": "colors",
+                  "value": "[{\"name\": \"Black\", \"hex\": \"#000000\", \"available\": true}, {\"name\": \"Silver\", \"hex\": \"#C0C0C0\", \"available\": true}]",
+                  "type": "text",
+                  "description": "الألوان المتاحة (JSON Array)"
+                },
+                {
+                  "key": "images",
+                  "type": "file",
+                  "description": "صورة المنتج الأولى",
+                  "src": []
+                },
+                {
+                  "key": "images",
+                  "type": "file",
+                  "description": "صورة المنتج الثانية",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["products"]
+            },
+            "description": "إنشاء منتج جديد مع الصور\n\nمتطلبات:\n- صلاحيات Admin أو Moderator\n- رفع صورة واحدة على الأقل\n- الحد الأقصى 10 صور\n- حجم الصورة أقل من 5MB\n- صيغ مدعومة: JPEG, PNG, WebP"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": []
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/products",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["products"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Product created successfully\",\n  \"data\": {\n    \"_id\": \"64f8a1b2c3d4e5f6a7b8c9d0\",\n    \"id\": \"PROD-12345\",\n    \"handle\": \"gaming-laptop-pro\",\n    \"title\": {\n      \"en\": \"Gaming Laptop Pro Max\",\n      \"ar\": \"لابتوب الألعاب برو ماكس\"\n    },\n    \"description\": {\n      \"en\": \"High-performance gaming laptop...\",\n      \"ar\": \"لابتوب ألعاب عالي الأداء...\"\n    },\n    \"price\": 2499.99,\n    \"images\": [\n      {\n        \"secure_url\": \"https://cloudinary.com/image1.jpg\",\n        \"public_id\": \"products/image1\"\n      }\n    ],\n    \"createdAt\": \"2024-01-15T10:30:00.000Z\",\n    \"updatedAt\": \"2024-01-15T10:30:00.000Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "📝 Update Product",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title[en]",
+                  "value": "Updated Gaming Laptop Pro Max",
+                  "type": "text",
+                  "description": "العنوان المحدث بالإنجليزية"
+                },
+                {
+                  "key": "title[ar]",
+                  "value": "لابتوب الألعاب برو ماكس المحدث",
+                  "type": "text",
+                  "description": "العنوان المحدث بالعربية"
+                },
+                {
+                  "key": "price",
+                  "value": "2299.99",
+                  "type": "text",
+                  "description": "السعر الجديد"
+                },
+                {
+                  "key": "inStock",
+                  "value": "true",
+                  "type": "text",
+                  "description": "حالة التوفر"
+                },
+                {
+                  "key": "images",
+                  "type": "file",
+                  "description": "صورة جديدة (اختيارية)",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "{{productId}}"]
+            },
+            "description": "تحديث منتج موجود\n\nمتطلبات:\n- صلاحيات Admin أو Moderator\n- معرف المنتج صحيح\n- يمكن تحديث الصور (اختياري)"
+          },
+          "response": []
+        },
+        {
+          "name": "🗑️ Delete Product",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "{{productId}}"]
+            },
+            "description": "حذف منتج\n\nمتطلبات:\n- صلاحيات Admin أو Moderator\n- معرف المنتج صحيح"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🔍 Product Queries",
+      "description": "مجموعة APIs استعلام المنتجات والبحث",
+      "item": [
+        {
+          "name": "📋 Get All Products",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products?page=1&limit=20&sort=createdAt:desc&search=gaming&category={{categoryId}}&inStock=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["products"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "رقم الصفحة (افتراضي: 1)"
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "عدد المنتجات في الصفحة (افتراضي: 20، أقصى: 100)"
+                },
+                {
+                  "key": "sort",
+                  "value": "createdAt:desc",
+                  "description": "ترتيب النتائج (مثال: price:asc, createdAt:desc)"
+                },
+                {
+                  "key": "search",
+                  "value": "gaming",
+                  "description": "البحث في العنوان والوصف"
+                },
+                {
+                  "key": "category",
+                  "value": "{{categoryId}}",
+                  "description": "فلترة حسب الفئة"
+                },
+                {
+                  "key": "inStock",
+                  "value": "true",
+                  "description": "فلترة حسب التوفر (true/false)"
+                }
+              ]
+            },
+            "description": "الحصول على جميع المنتجات مع إمكانية الفلترة والبحث والترقيم\n\nالمعاملات المتاحة:\n- page: رقم الصفحة\n- limit: عدد المنتجات\n- sort: ترتيب النتائج\n- search: البحث النصي\n- category: فلترة حسب الفئة\n- inStock: فلترة حسب التوفر"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/products",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["products"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Products retrieved successfully\",\n  \"data\": {\n    \"products\": [\n      {\n        \"_id\": \"64f8a1b2c3d4e5f6a7b8c9d0\",\n        \"id\": \"PROD-12345\",\n        \"handle\": \"gaming-laptop-pro\",\n        \"title\": {\n          \"en\": \"Gaming Laptop Pro Max\",\n          \"ar\": \"لابتوب الألعاب برو ماكس\"\n        },\n        \"price\": 2499.99,\n        \"images\": [\n          {\n            \"secure_url\": \"https://cloudinary.com/image1.jpg\"\n          }\n        ],\n        \"inStock\": true,\n        \"category\": {\n          \"_id\": \"64f8a1b2c3d4e5f6a7b8c9d1\",\n          \"name\": \"Laptops\"\n        }\n      }\n    ],\n    \"pagination\": {\n      \"currentPage\": 1,\n      \"totalPages\": 5,\n      \"totalProducts\": 95,\n      \"hasNextPage\": true,\n      \"hasPrevPage\": false\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "🎯 Get Product by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "{{productId}}"]
+            },
+            "description": "الحصول على منتج واحد باستخدام معرف المنتج\n\nيعرض جميع تفاصيل المنتج بما في ذلك:\n- المعلومات الأساسية\n- الصور\n- الأحجام والألوان\n- معلومات التخفيضات\n- تفاصيل الفئة"
+          },
+          "response": []
+        },
+        {
+          "name": "🔗 Get Product by Handle",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/handle/gaming-laptop-pro",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "handle", "gaming-laptop-pro"]
+            },
+            "description": "الحصول على منتج باستخدام Handle/Slug\n\nمفيد للروابط الصديقة لمحركات البحث\nمثال: /products/handle/gaming-laptop-pro"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🧪 Test Scenarios",
+      "description": "سيناريوهات اختبار مختلفة للتأكد من عمل APIs بشكل صحيح",
+      "item": [
+        {
+          "name": "❌ Create Product - Missing Images",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "id",
+                  "value": "PROD-TEST-NO-IMAGES",
+                  "type": "text"
+                },
+                {
+                  "key": "handle",
+                  "value": "test-product-no-images",
+                  "type": "text"
+                },
+                {
+                  "key": "title[en]",
+                  "value": "Test Product",
+                  "type": "text"
+                },
+                {
+                  "key": "title[ar]",
+                  "value": "منتج تجريبي",
+                  "type": "text"
+                },
+                {
+                  "key": "description[en]",
+                  "value": "This is a test product without images",
+                  "type": "text"
+                },
+                {
+                  "key": "description[ar]",
+                  "value": "هذا منتج تجريبي بدون صور",
+                  "type": "text"
+                },
+                {
+                  "key": "price",
+                  "value": "99.99",
+                  "type": "text"
+                },
+                {
+                  "key": "category",
+                  "value": "{{categoryId}}",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["products"]
+            },
+            "description": "اختبار إنشاء منتج بدون صور - يجب أن يفشل\nالنتيجة المتوقعة: 400 Bad Request"
+          },
+          "response": []
+        },
+        {
+          "name": "❌ Get Product - Invalid ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/invalid-product-id",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "invalid-product-id"]
+            },
+            "description": "اختبار الحصول على منتج بمعرف غير صحيح\nالنتيجة المتوقعة: 400 Bad Request أو 404 Not Found"
+          },
+          "response": []
+        },
+        {
+          "name": "❌ Unauthorized Access",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "id",
+                  "value": "PROD-UNAUTHORIZED",
+                  "type": "text"
+                },
+                {
+                  "key": "handle",
+                  "value": "unauthorized-test",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["products"]
+            },
+            "description": "اختبار الوصول بدون توكن مصادقة\nالنتيجة المتوقعة: 401 Unauthorized"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// تحقق من وجود التوكن",
+          "if (!pm.collectionVariables.get('authToken')) {",
+          "    console.log('⚠️ تحذير: لم يتم تعيين authToken. يرجى تسجيل الدخول أولاً.');",
+          "}",
+          "",
+          "// تعيين معرف منتج عشوائي للاختبار",
+          "if (!pm.collectionVariables.get('productId')) {",
+          "    pm.collectionVariables.set('productId', '64f8a1b2c3d4e5f6a7b8c9d0');",
+          "}",
+          "",
+          "// تعيين معرف فئة عشوائي للاختبار",
+          "if (!pm.collectionVariables.get('categoryId')) {",
+          "    pm.collectionVariables.set('categoryId', '64f8a1b2c3d4e5f6a7b8c9d1');",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// اختبارات عامة لجميع الطلبات",
+          "pm.test('Response time is less than 5000ms', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+          "});",
+          "",
+          "pm.test('Response has correct content type', function () {",
+          "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+          "});",
+          "",
+          "// حفظ معرف المنتج من الاستجابة إذا كان متاحاً",
+          "if (pm.response.code === 201 && pm.response.json().data && pm.response.json().data._id) {",
+          "    pm.collectionVariables.set('productId', pm.response.json().data._id);",
+          "    console.log('✅ تم حفظ معرف المنتج الجديد:', pm.response.json().data._id);",
+          "}",
+          "",
+          "// اختبار هيكل الاستجابة للطلبات الناجحة",
+          "if (pm.response.code >= 200 && pm.response.code < 300) {",
+          "    pm.test('Response has success structure', function () {",
+          "        const jsonData = pm.response.json();",
+          "        pm.expect(jsonData).to.have.property('success');",
+          "        pm.expect(jsonData).to.have.property('message');",
+          "        pm.expect(jsonData.success).to.be.true;",
+          "    });",
+          "}"
+        ]
+      }
+    }
+  ]
+}
