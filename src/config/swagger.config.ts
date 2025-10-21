@@ -115,7 +115,7 @@ const DEVELOPMENT_CONFIG: SwaggerConfig = {
   },
   servers: [
     {
-      url: 'http://localhost:3000',
+      url: 'http://localhost:3000/api',
       description: 'Development server',
     },
     {
@@ -229,7 +229,7 @@ const STAGING_CONFIG: SwaggerConfig = {
   ...DEVELOPMENT_CONFIG,
   servers: [
     {
-      url: 'https://staging-api.zenstore.com',
+      url: 'https://staging-api.zenstore.com/api',
       description: 'Staging server',
     },
     {
@@ -248,7 +248,7 @@ const PRODUCTION_CONFIG: SwaggerConfig = {
   enabled: process.env.SWAGGER_ENABLED === 'true', // Disabled by default in production
   servers: [
     {
-      url: 'https://api.zenstore.com',
+      url: 'https://api.zenstore.com/api',
       description: 'Production server',
     },
     {

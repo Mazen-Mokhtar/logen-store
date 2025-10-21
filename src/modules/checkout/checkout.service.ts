@@ -10,11 +10,12 @@ import { UserRepository } from 'src/DB/models/User/user.repository';
 import { OrderRepository } from 'src/DB/models/Order/order.repository';
 import { StripeService } from 'src/commen/service/stripe.service';
 import { TUser, SystemRoles } from 'src/DB/models/User/user.schema';
-import { OrderStatus, Currency } from 'src/DB/models/Order/order.schema';
+import { OrderStatus } from 'src/DB/models/Order/order.schema';
 import {
   CheckoutRequestDTO,
   CheckoutResponseDTO,
   PaymentMethod,
+  Currency,
   GuestInfoDTO,
 } from './dto/checkout.dto';
 import { messageSystem } from 'src/commen/messages';
@@ -36,7 +37,8 @@ export class CheckoutService {
     const existingOrder = await this.orderRepository.findOne({
       idempotency_key: checkoutData.idempotencyKey,
     });
-
+    console.log(checkoutData);
+    
     if (existingOrder) {
       return this.buildCheckoutResponse(existingOrder, 'Order already processed');
     }
@@ -63,6 +65,9 @@ export class CheckoutService {
       // Create order
       const orderData = {
         userId: user._id,
+        productName: checkoutData.items.length === 1 
+          ? checkoutData.items[0].title 
+          : `Multiple Items (${checkoutData.items.length} items)`,
         items: checkoutData.items.map(item => ({
         id: item.id,
         title: item.title,
@@ -74,9 +79,10 @@ export class CheckoutService {
       })),
         totalAmount,
         currency: checkoutData.currency,
-        status: checkoutData.paymentMethod === PaymentMethod.COD 
+        status: checkoutData.paymentMethod === PaymentMethod.CASH 
           ? OrderStatus.PENDING_COD 
           : OrderStatus.PENDING,
+        paymentMethod: checkoutData.paymentMethod,
         payment_gateway: checkoutData.paymentMethod,
         idempotency_key: checkoutData.idempotencyKey,
         notes: checkoutData.notes,
@@ -91,12 +97,14 @@ export class CheckoutService {
       },
       };
 
-      const order = await this.orderRepository.create(orderData);
+      // Create order within the transaction session
+      const orderDoc = new this.orderRepository.orderModel(orderData);
+      const order = await orderDoc.save({ session });
 
       let paymentResponse: any = {};
 
       // Handle payment based on method
-      if (checkoutData.paymentMethod === PaymentMethod.STRIPE) {
+      if (checkoutData.paymentMethod === PaymentMethod.CARD) {
         paymentResponse = await this.processStripePayment(
           order,
           totalAmount,
@@ -111,9 +119,12 @@ export class CheckoutService {
           payment_intent_id: paymentResponse.paymentIntentId,
         };
         await order.save({ session });
-      } else if (checkoutData.paymentMethod === PaymentMethod.PAYMOB) {
-        // TODO: Implement Paymob integration
-        throw new BadRequestException('Paymob payment method not yet implemented');
+      } else if (checkoutData.paymentMethod === PaymentMethod.CASH) {
+        // Cash on delivery - no additional processing needed
+        // Order status is already set to PENDING_COD above
+      } else {
+        // Unknown payment method
+        throw new BadRequestException('Unsupported payment method');
       }
 
       // Commit transaction

@@ -15,12 +15,15 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Currency } from 'src/DB/models/Order/order.schema';
 
 export enum PaymentMethod {
-  COD = 'cod',
-  STRIPE = 'stripe',
-  PAYMOB = 'paymob',
+  CARD = 'card',
+  CASH = 'cash',
+}
+
+export enum Currency {
+  USD = 'USD',
+  EGP = 'EGP',
 }
 
 export class CartItemDTO {

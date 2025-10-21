@@ -1,11 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
-import { PaymentMethod } from 'src/modules/order/enums/payment-method.enum';
-
-export enum Currency {
-  USD = 'USD',
-  EGP = 'EGP',
-}
+import { PaymentMethod, Currency } from 'src/modules/checkout/dto/checkout.dto';
 
 export enum OrderStatus {
     PENDING = "pending",

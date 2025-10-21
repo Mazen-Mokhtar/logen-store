@@ -19,6 +19,7 @@ import { ProductModule } from './modules/product/product.module';
 import { CheckoutModule } from './modules/checkout/checkout.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { CartModule } from './modules/cart/cart.module';
+import { SeoModule } from './modules/seo/seo.module';
 import {
   RateLimitMiddleware,
   AuthRateLimitMiddleware,
@@ -29,6 +30,8 @@ import {
 } from './commen/middleware/strict-rate-limit.middleware';
 import { HelmetMiddleware } from './commen/middleware/helmet.middleware';
 import { SanitizationMiddleware } from './commen/middleware/sanitization.middleware';
+import { SeoRedirectMiddleware } from './modules/seo/middleware/seo-redirect.middleware';
+import { SeoMetaMiddleware } from './modules/seo/middleware/seo-meta.middleware';
 import { CsrfMiddleware } from './commen/middleware/csrf.middleware';
 import { SecurityModule } from './commen/security/security.module';
 import { ApiVersionInterceptor } from './commen/interceptors/api-version.interceptor';
@@ -83,6 +86,7 @@ import { MonitoringService } from './commen/services/monitoring.service';
     CheckoutModule,
     PaymentModule,
     CartModule,
+    SeoModule,
   ],
   controllers: [],
   providers: [
@@ -121,6 +125,12 @@ export class AppModule implements NestModule {
 
     // Apply sanitization middleware to all routes
     consumer.apply(SanitizationMiddleware).forRoutes('*');
+
+    // Apply SEO redirects middleware (before other processing)
+    consumer.apply(SeoRedirectMiddleware).forRoutes('*');
+
+    // Apply SEO meta injection middleware
+    consumer.apply(SeoMetaMiddleware).forRoutes('*');
 
     // Apply general rate limiting to all routes
     consumer.apply(RateLimitMiddleware).forRoutes('*');

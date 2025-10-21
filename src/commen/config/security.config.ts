@@ -13,7 +13,7 @@ export const SecurityConfig = {
   // General API Rate Limiting
   rateLimit: {
     windowMs: 15 * 60 * 1000, // 15 minutes
-    maxRequests: 100, // Reduced from 150 for better protection
+    maxRequests: 1000, // Reduced from 150 for better protection
     message: 'Too many requests, please try again later.',
     skipSuccessfulRequests: false,
     skipFailedRequests: false,

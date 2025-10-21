@@ -68,6 +68,9 @@ async function bootstrap() {
     }),
   );
 
+  // Set global prefix for all routes
+  app.setGlobalPrefix('api');
+
   // Global exception filter
   app.useGlobalFilters(new AllExceptionsFilter());
 

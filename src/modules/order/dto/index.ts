@@ -16,6 +16,8 @@ import {
   Length,
   IsInt,
   Min,
+  IsEmail,
+  ValidateIf,
 } from 'class-validator';
 import { Types } from 'mongoose';
 import { OrderStatus } from 'src/DB/models/Order/order.schema';
@@ -281,4 +283,24 @@ export class UserOrderQueryDTO {
   @IsString()
   @IsOptional()
   endDate?: string;
+}
+
+export class TrackOrderDTO {
+  @IsString({ message: 'Order ID must be a string' })
+  @Length(8, 8, { message: 'Order ID must be exactly 8 characters long' })
+  @Matches(/^[a-zA-Z0-9]{8}$/, { 
+    message: 'Order ID must contain only alphanumeric characters (letters and numbers)' 
+  })
+  orderId: string;
+
+  @IsEmail({}, { message: 'Email must be a valid email address' })
+  @IsOptional()
+  email?: string;
+
+  @IsString({ message: 'Phone must be a string' })
+  @Matches(/^[\+]?[1-9][\d]{0,15}$/, { 
+    message: 'Phone must be a valid phone number format' 
+  })
+  @IsOptional()
+  phone?: string;
 }

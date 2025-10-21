@@ -2,9 +2,11 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { OrderRepository } from 'src/DB/models/Order/order.repository';
 import { TUser } from 'src/DB/models/User/user.schema';
+import { UserRepository } from 'src/DB/models/User/user.repository';
 import {
   CreateOrderDTO,
   CreateCartOrderDTO,
@@ -12,8 +14,10 @@ import {
   UpdateOrderStatusDTO,
   AdminOrderQueryDTO,
   UserOrderQueryDTO,
+  TrackOrderDTO,
 } from './dto';
-import { OrderStatus, Currency } from 'src/DB/models/Order/order.schema';
+import { OrderStatus } from 'src/DB/models/Order/order.schema';
+import { PaymentMethod, Currency } from 'src/modules/checkout/dto/checkout.dto';
 import { Types } from 'mongoose';
 import { StripeService } from 'src/commen/service/stripe.service';
 import { Request } from 'express';
@@ -32,6 +36,7 @@ export class OrderService {
     private readonly orderRepository: OrderRepository,
     private readonly stripeService: StripeService,
     private readonly couponService: CouponService,
+    private readonly userRepository: UserRepository,
   ) {}
 
   async createCartOrder(user: TUser, body: CreateCartOrderDTO) {
@@ -307,7 +312,7 @@ export class OrderService {
     }
 
     let refund = {};
-    if (order.paymentMethod === 'card' && order.status === OrderStatus.PAID) {
+    if (order.paymentMethod === PaymentMethod.CARD && order.status === OrderStatus.PAID) {
       refund = {
         refundAmount: order.totalAmount,
         refundDate: new Date(),
@@ -585,7 +590,7 @@ export class OrderService {
 
     if (body.status === OrderStatus.REJECTED) {
       // Refund if order was paid
-      if (order.paymentMethod === 'card' && order.status === OrderStatus.PAID) {
+      if (order.paymentMethod === PaymentMethod.CARD && order.status === OrderStatus.PAID) {
         updateData.refundAmount = order.totalAmount;
         updateData.refundDate = new Date();
         // Note: You'll need to implement refund logic in StripeService
@@ -717,5 +722,77 @@ export class OrderService {
     }
 
     return await this.stripeService.createCoupon(couponParams);
+  }
+
+  async trackOrder(query: TrackOrderDTO) {
+    const { orderId, email, phone } = query;
+
+    // Find the order by matching the last 8 characters of the ObjectId
+    // MongoDB ObjectIds are 24 characters long, so we search for orders where
+    // the last 8 characters of the _id match the provided orderId
+    const order = await this.orderRepository.findOneWithPopulate(
+      { 
+        $expr: {
+          $eq: [
+            { $substrCP: [{ $toString: "$_id" }, 16, 8] },
+            orderId
+          ]
+        }
+      },
+      '',
+      {},
+      [{ path: 'userId', select: 'email phone' }]
+    );
+
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    // If email or phone is provided, verify it matches the user's data
+    if (email || phone) {
+      const user = order.userId as any;
+      if (!user) {
+        throw new NotFoundException('User associated with order not found');
+      }
+
+      let isAuthorized = false;
+
+      if (email && user.email) {
+        isAuthorized = user.email.toLowerCase() === email.toLowerCase();
+      }
+
+      if (!isAuthorized && phone && user.phone) {
+        // Note: Phone comparison might need special handling due to encryption
+        // For now, we'll do a direct comparison after decryption (handled by schema hooks)
+        isAuthorized = user.phone === phone;
+      }
+
+      if (!isAuthorized) {
+        throw new ForbiddenException('Access denied - email or phone does not match order');
+      }
+    }
+
+    // Return order details without sensitive information
+    const sanitizedOrder = {
+      _id: order._id,
+      productName: order.productName,
+      status: order.status,
+      totalAmount: order.totalAmount,
+      currency: order.currency,
+      paymentMethod: order.paymentMethod,
+      createdAt: order.createdAt,
+      paidAt: order.paidAt,
+      items: order.items,
+      shippingInfo: order.shippingInfo,
+      subtotal: order.subtotal,
+      shipping: order.shipping,
+      tax: order.tax,
+      total: order.total,
+    };
+
+    return {
+      success: true,
+      data: sanitizedOrder,
+    };
   }
 }

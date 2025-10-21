@@ -34,6 +34,7 @@ import {
   UpdateOrderStatusDTO,
   AdminOrderQueryDTO,
   UserOrderQueryDTO,
+  TrackOrderDTO,
 } from './dto';
 import { Roles } from 'src/commen/Decorator/roles.decorator';
 import { AuthGuard } from 'src/commen/Guards/auth.guard';
@@ -83,7 +84,49 @@ export class OrderController {
   async getOrderStats() {
     return await this.orderService.getOrderStats();
   }
-
+  @ApiOperation({
+    summary: 'Track order by ID',
+    description: 'Track an order using the last 8 characters of order ID. Email and phone are optional for additional verification. No authentication required.',
+  })
+  @ApiQuery({
+    name: 'orderId',
+    required: true,
+    description: 'Last 8 characters of the Order ID (alphanumeric only)',
+    type: String,
+    example: 'a1b2c3d4',
+  })
+  @ApiQuery({
+    name: 'email',
+    required: false,
+    description: 'Optional email address for additional verification',
+    type: String,
+  })
+  @ApiQuery({
+    name: 'phone',
+    required: false,
+    description: 'Optional phone number for additional verification',
+    type: String,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Order details retrieved successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid request parameters or validation failed - Order ID must be exactly 8 alphanumeric characters',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Access denied - provided email or phone does not match order',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Order not found',
+  })
+  @Get('track')
+  async trackOrder(@Query() query: TrackOrderDTO) {
+    return await this.orderService.trackOrder(query);
+  }
   @ApiOperation({
     summary: 'Get user orders',
     description:
@@ -364,4 +407,6 @@ export class OrderController {
     const orderId = new Types.ObjectId(params.orderId);
     return await this.orderService.updateOrderStatus(admin, orderId, body);
   }
+
+  
 }

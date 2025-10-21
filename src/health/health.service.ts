@@ -683,4 +683,245 @@ export class HealthService {
       }, 100);
     });
   }
+
+  /**
+   * Debug health check with detailed system information
+   */
+  async getDebugHealth(): Promise<any> {
+    const startTime = Date.now();
+    
+    try {
+      const systemInfo = {
+        // System information
+        system: {
+          platform: os.platform(),
+          arch: os.arch(),
+          release: os.release(),
+          hostname: os.hostname(),
+          uptime: os.uptime(),
+          loadavg: os.loadavg(),
+          cpus: os.cpus().length,
+          totalMemory: os.totalmem(),
+          freeMemory: os.freemem(),
+        },
+        
+        // Process information
+        process: {
+          pid: process.pid,
+          uptime: process.uptime(),
+          version: process.version,
+          versions: process.versions,
+          memoryUsage: process.memoryUsage(),
+          cpuUsage: process.cpuUsage(),
+          env: {
+            NODE_ENV: process.env.NODE_ENV,
+            PORT: process.env.PORT,
+            DATABASE_URL: process.env.DATABASE_URL ? '[REDACTED]' : 'Not set',
+            REDIS_URL: process.env.REDIS_URL ? '[REDACTED]' : 'Not set',
+          },
+        },
+        
+        // Application metrics
+        metrics: this.metricsCollector.getMetrics(),
+        
+        // Health check configuration
+        config: {
+          checks: this.config.checks,
+          thresholds: this.config.thresholds,
+          monitoring: this.config.monitoring,
+        },
+        
+        // Database connection details
+        database: {
+          readyState: this.mongoConnection.readyState,
+          host: this.mongoConnection.host,
+          port: this.mongoConnection.port,
+          name: this.mongoConnection.name,
+        },
+        
+        // Performance timing
+        responseTime: Date.now() - startTime,
+        timestamp: new Date().toISOString(),
+      };
+      
+      this.logger.debug('Debug health check completed', {
+        responseTime: systemInfo.responseTime,
+        memoryUsage: systemInfo.process.memoryUsage,
+      });
+      
+      return systemInfo;
+    } catch (error) {
+      this.logger.error('Debug health check failed', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Enhanced logging for health checks
+   */
+  private logHealthCheckResult(check: ServiceHealthCheck): void {
+    const logData = {
+      service: check.name,
+      status: check.status,
+      responseTime: check.responseTime,
+      timestamp: check.timestamp,
+    };
+
+    switch (check.status) {
+      case HealthStatus.HEALTHY:
+        this.logger.log(`Health check passed: ${check.name}`, logData);
+        break;
+      case HealthStatus.WARNING:
+        this.logger.warn(`Health check warning: ${check.name} - ${check.message}`, logData);
+        break;
+      case HealthStatus.CRITICAL:
+        this.logger.error(`Health check failed: ${check.name} - ${check.message}`, logData);
+        break;
+    }
+  }
+
+  /**
+   * Get health metrics for monitoring
+   */
+  async getHealthMetrics(): Promise<any> {
+    const metrics = this.metricsCollector.getMetrics();
+    const memoryUsage = process.memoryUsage();
+    const systemMemory = {
+      total: os.totalmem(),
+      free: os.freemem(),
+      used: os.totalmem() - os.freemem(),
+    };
+
+    return {
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      
+      // Memory metrics
+      memory: {
+        heap: {
+          used: memoryUsage.heapUsed,
+          total: memoryUsage.heapTotal,
+          usagePercent: Math.round((memoryUsage.heapUsed / memoryUsage.heapTotal) * 100),
+        },
+        system: {
+          ...systemMemory,
+          usagePercent: Math.round((systemMemory.used / systemMemory.total) * 100),
+        },
+        rss: memoryUsage.rss,
+        external: memoryUsage.external,
+      },
+      
+      // CPU metrics
+      cpu: {
+        usage: process.cpuUsage(),
+        loadAverage: os.loadavg(),
+        cores: os.cpus().length,
+      },
+      
+      // Application metrics
+      application: metrics,
+      
+      // Database metrics
+      database: {
+        readyState: this.mongoConnection.readyState,
+        connectionCount: this.mongoConnection.db?.stats ? 'Available' : 'Unavailable',
+      },
+    };
+  }
+
+  /**
+   * Check if system is ready to serve traffic
+   */
+  async getReadinessCheck(): Promise<HealthCheckResult> {
+    try {
+      // Check critical dependencies only
+      const criticalChecks: Promise<ServiceHealthCheck>[] = [];
+      
+      if (this.config.checks.database.enabled) {
+        criticalChecks.push(this.checkDatabaseHealth());
+      }
+      
+      const results = await Promise.allSettled(criticalChecks);
+      const failedChecks = results.filter(result => 
+        result.status === 'rejected' || 
+        (result.status === 'fulfilled' && result.value.status === HealthStatus.CRITICAL)
+      );
+      
+      if (failedChecks.length > 0) {
+        return {
+          status: HealthStatus.CRITICAL,
+          message: 'Service not ready - critical dependencies failed',
+          details: { failedChecks: failedChecks.length },
+          timestamp: new Date().toISOString(),
+        };
+      }
+      
+      return {
+        status: HealthStatus.HEALTHY,
+        message: 'Service is ready',
+        details: { 
+          uptime: process.uptime(),
+          criticalChecks: criticalChecks.length,
+        },
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      this.logger.error('Readiness check failed', error);
+      return {
+        status: HealthStatus.CRITICAL,
+        message: 'Readiness check failed',
+        details: { error: error.message },
+        timestamp: new Date().toISOString(),
+      };
+    }
+  }
+
+  /**
+   * Check if service is alive (basic liveness probe)
+   */
+  async getLivenessCheck(): Promise<HealthCheckResult> {
+    try {
+      const uptime = process.uptime();
+      const memoryUsage = process.memoryUsage();
+      
+      // Basic checks to ensure the process is responsive
+      if (uptime < 1) {
+        return {
+          status: HealthStatus.WARNING,
+          message: 'Service just started',
+          details: { uptime },
+          timestamp: new Date().toISOString(),
+        };
+      }
+      
+      // Check if memory usage is extremely high (potential memory leak)
+      const heapUsagePercent = (memoryUsage.heapUsed / memoryUsage.heapTotal) * 100;
+      if (heapUsagePercent > 95) {
+        return {
+          status: HealthStatus.CRITICAL,
+          message: 'Critical memory usage detected',
+          details: { heapUsagePercent },
+          timestamp: new Date().toISOString(),
+        };
+      }
+      
+      return {
+        status: HealthStatus.HEALTHY,
+        message: 'Service is alive',
+        details: { 
+          uptime,
+          heapUsagePercent: Math.round(heapUsagePercent),
+        },
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      this.logger.error('Liveness check failed', error);
+      return {
+        status: HealthStatus.CRITICAL,
+        message: 'Liveness check failed',
+        details: { error: error.message },
+        timestamp: new Date().toISOString(),
+      };
+    }
+  }
 }
