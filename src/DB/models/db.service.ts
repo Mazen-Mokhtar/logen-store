@@ -3,6 +3,11 @@ import { FilterQuery, Model, QueryOptions, Types, UpdateQuery } from 'mongoose';
 export abstract class DBService<T> {
   constructor(protected readonly model: Model<T>) {}
 
+  // Public getter for the model to allow access to Mongoose methods like populate
+  get mongooseModel(): Model<T> {
+    return this.model;
+  }
+
   async create(document: Partial<T>) {
     return this.model.create(document as T);
   }

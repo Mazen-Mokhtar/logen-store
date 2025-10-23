@@ -33,6 +33,18 @@ export interface IProductColor {
   available?: boolean;
 }
 
+export interface IProductRatingStats {
+  averageRating: number;
+  totalRatings: number;
+  ratingDistribution: {
+    5: number;
+    4: number;
+    3: number;
+    2: number;
+    1: number;
+  };
+}
+
 @Schema({ 
   timestamps: true,
   _id: true,  // تأكيد أن MongoDB سيقوم بإنشاء _id تلقائياً
@@ -110,6 +122,9 @@ export class Product {
 
   @Prop({ type: String, required: true })
   folderId: string;
+
+  // Virtual field for rating statistics (not stored in DB)
+  ratingStats?: IProductRatingStats;
 }
 
 export const productSchema = SchemaFactory.createForClass(Product);

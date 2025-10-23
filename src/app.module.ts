@@ -20,6 +20,7 @@ import { CheckoutModule } from './modules/checkout/checkout.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { CartModule } from './modules/cart/cart.module';
 import { SeoModule } from './modules/seo/seo.module';
+import { RatingModule } from './modules/rating/rating.module';
 import {
   RateLimitMiddleware,
   AuthRateLimitMiddleware,
@@ -87,6 +88,7 @@ import { MonitoringService } from './commen/services/monitoring.service';
     PaymentModule,
     CartModule,
     SeoModule,
+    RatingModule,
   ],
   controllers: [],
   providers: [

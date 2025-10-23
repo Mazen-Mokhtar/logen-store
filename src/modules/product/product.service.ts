@@ -13,6 +13,7 @@ import {
 } from './dto/index';
 import { cloudService, IAttachments } from 'src/commen/multer/cloud.service';
 import { ProductRepository } from 'src/DB/models/Product/product.repository';
+import { RatingRepository } from 'src/DB/models/Rating/rating.repository';
 import { FilterQuery } from 'mongoose';
 
 @Injectable()
@@ -20,6 +21,7 @@ export class ProductService {
   constructor(
     private readonly productRepository: ProductRepository,
     private readonly cloudService: cloudService,
+    private readonly ratingRepository: RatingRepository,
   ) {}
 
   async create(
@@ -148,7 +150,16 @@ export class ProductService {
       { path: 'createdBy', select: '-password' },
     ]);
 
-    return { success: true, data: product };
+    // Get rating statistics
+    const ratingStats = await this.ratingRepository.getProductRatingStats(params.productId);
+
+    return { 
+      success: true, 
+      data: {
+        ...product.toObject(),
+        ratingStats
+      }
+    };
   }
 
   async getProductByHandle(handle: string) {
@@ -162,7 +173,16 @@ export class ProductService {
       { path: 'createdBy', select: '-password' },
     ]);
 
-    return { success: true, data: product };
+    // Get rating statistics
+    const ratingStats = await this.ratingRepository.getProductRatingStats(product._id);
+
+    return { 
+      success: true, 
+      data: {
+        ...product.toObject(),
+        ratingStats
+      }
+    };
   }
 
   async getAllProducts(query: QueryProductDTO) {
@@ -206,9 +226,13 @@ export class ProductService {
       options,
     );
 
-    // Populate category information
+    // Populate category information and add rating statistics
     for (const product of products) {
       await product.populate([{ path: 'category', select: 'name slug type' }]);
+      
+      // Add rating statistics
+      const ratingStats = await this.ratingRepository.getProductRatingStats(product._id);
+      (product as any).ratingStats = ratingStats;
     }
 
     const total = await this.productRepository.countDocuments(filter);
