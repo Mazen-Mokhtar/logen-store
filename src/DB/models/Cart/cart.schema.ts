@@ -7,6 +7,7 @@ export interface ICartItem {
   productId: Types.ObjectId;
   title: string;
   price: number;
+  currency: string;
   image: string;
   quantity: number;
   size?: string;
@@ -27,6 +28,12 @@ export class Cart {
       productId: { type: Types.ObjectId, ref: Product.name, required: true },
       title: { type: String, required: true },
       price: { type: Number, required: true, min: 0 },
+      currency: { 
+        type: String, 
+        required: true, 
+        enum: ['USD', 'EUR', 'EGP', 'SAR', 'AED', 'KWD', 'QAR', 'BHD', 'OMR', 'JOD'],
+        default: 'USD'
+      },
       image: { type: String, required: true },
       quantity: { type: Number, required: true, min: 1, default: 1 },
       size: { type: String, required: false },

@@ -36,6 +36,7 @@ import {
   UpdateProductDTO,
   ParamProductDTO,
   QueryProductDTO,
+  BulkCreateProductDTO,
 } from './dto';
 import { PRODUCT_CONSTANTS } from './product.constants';
 import { ProductSwaggerSchemas, ProductApiResponses, ProductQueryParams, ProductPathParams } from './product.swagger';
@@ -76,6 +77,12 @@ export class ProductController {
           },
         },
         price: { type: 'number', description: 'Product price' },
+        currency: { 
+          type: 'string', 
+          description: 'Product currency',
+          enum: ['USD', 'EUR', 'EGP', 'SAR', 'AED', 'KWD', 'QAR', 'BHD', 'OMR', 'JOD'],
+          default: 'USD'
+        },
         category: { type: 'string', description: 'Category ID' },
         tags: { type: 'array', items: { type: 'string' } },
         inStock: { type: 'boolean', description: 'Stock availability' },
@@ -106,6 +113,25 @@ export class ProductController {
               name: { type: 'string' },
               hex: { type: 'string' },
               available: { type: 'boolean' },
+            },
+          },
+        },
+        warranty: {
+          type: 'object',
+          properties: {
+            hasWarranty: { type: 'boolean', description: 'Whether product has warranty' },
+            warrantyPeriod: { type: 'number', description: 'Warranty period in months' },
+            warrantyType: { 
+              type: 'string', 
+              enum: ['manufacturer', 'seller', 'extended'],
+              description: 'Type of warranty'
+            },
+            warrantyDescription: {
+              type: 'object',
+              properties: {
+                en: { type: 'string', description: 'English warranty description' },
+                ar: { type: 'string', description: 'Arabic warranty description' },
+              },
             },
           },
         },
@@ -160,6 +186,172 @@ export class ProductController {
     return this.productService.create(user, createProductDto, files);
   }
 
+  @Post('bulk')
+  @UseGuards(AuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @Roles([PRODUCT_CONSTANTS.ROLES.ADMIN, PRODUCT_CONSTANTS.ROLES.MODERATOR])
+  @ApiOperation({
+    summary: 'Bulk Create Products',
+    description: 'Create multiple products at once with pre-uploaded image URLs (Admin/Super Admin only)',
+  })
+  @ApiConsumes('application/json')
+  @ApiBody({
+    description: 'Bulk product creation data with pre-uploaded image URLs',
+    schema: {
+      type: 'object',
+      properties: {
+        products: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              handle: { type: 'string', description: 'Product handle/slug' },
+              title: {
+                type: 'object',
+                properties: {
+                  en: { type: 'string', description: 'English title' },
+                  ar: { type: 'string', description: 'Arabic title' },
+                },
+              },
+              description: {
+                type: 'object',
+                properties: {
+                  en: { type: 'string', description: 'English description' },
+                  ar: { type: 'string', description: 'Arabic description' },
+                },
+              },
+              price: { type: 'number', description: 'Product price' },
+              currency: { 
+                type: 'string', 
+                description: 'Product currency',
+                enum: ['USD', 'EUR', 'EGP', 'SAR', 'AED', 'KWD', 'QAR', 'BHD', 'OMR', 'JOD'],
+                default: 'USD'
+              },
+              category: { type: 'string', description: 'Category ID' },
+              tags: { type: 'array', items: { type: 'string' } },
+              inStock: { type: 'boolean', description: 'Stock availability' },
+              promotion: {
+                type: 'object',
+                properties: {
+                  isOnSale: { type: 'boolean' },
+                  originalPrice: { type: 'number' },
+                  salePrice: { type: 'number' },
+                  saleEndDate: { type: 'string', format: 'date-time' },
+                },
+              },
+              sizes: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    name: { type: 'string' },
+                    available: { type: 'boolean' },
+                  },
+                },
+              },
+              colors: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    name: { type: 'string' },
+                    hex: { type: 'string' },
+                    available: { type: 'boolean' },
+                  },
+                },
+              },
+              warranty: {
+                type: 'object',
+                properties: {
+                  hasWarranty: { type: 'boolean', description: 'Whether product has warranty' },
+                  warrantyPeriod: { type: 'number', description: 'Warranty period in months' },
+                  warrantyType: { 
+                    type: 'string', 
+                    enum: ['manufacturer', 'seller', 'extended'],
+                    description: 'Type of warranty'
+                  },
+                  warrantyDescription: {
+                    type: 'object',
+                    properties: {
+                      en: { type: 'string', description: 'English warranty description' },
+                      ar: { type: 'string', description: 'Arabic warranty description' },
+                    },
+                  },
+                },
+              },
+              imageUrls: {
+                type: 'array',
+                items: { type: 'string' },
+                description: 'Array of pre-uploaded image URLs',
+              },
+            },
+            required: ['handle', 'title', 'description', 'price', 'category', 'imageUrls'],
+          },
+        },
+      },
+      required: ['products'],
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Products created successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        message: { type: 'string' },
+        results: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              handle: { type: 'string' },
+              data: { type: 'object' },
+            },
+          },
+        },
+        errors: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              handle: { type: 'string' },
+              error: { type: 'string' },
+            },
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request - Invalid input data or duplicate handles',
+    type: ErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - Invalid or missing token',
+    type: ErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Insufficient permissions',
+    type: ErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Conflict - Product handles already exist',
+    type: ErrorResponseDto,
+  })
+  async bulkCreateProducts(
+    @User() user: TUser,
+    @Body() bulkCreateProductDto: BulkCreateProductDTO,
+  ) {
+    return this.productService.bulkCreate(user, bulkCreateProductDto);
+  }
+
   /**
    * Transform multipart/form-data fields to proper types
    * Handles JSON strings and type conversions for form data
@@ -208,6 +400,19 @@ export class ProductController {
           data.promotion.salePrice = parseFloat(data.promotion.salePrice);
         }
       }
+
+      // Handle warranty object
+      if (data.warranty) {
+        if (typeof data.warranty === 'string') {
+          data.warranty = JSON.parse(data.warranty);
+        }
+        if (typeof data.warranty.hasWarranty === 'string') {
+          data.warranty.hasWarranty = data.warranty.hasWarranty === 'true';
+        }
+        if (typeof data.warranty.warrantyPeriod === 'string') {
+          data.warranty.warrantyPeriod = parseInt(data.warranty.warrantyPeriod);
+        }
+      }
       
     } catch (error) {
       throw new Error('Invalid JSON format in request data');
@@ -236,19 +441,15 @@ export class ProductController {
     return this.productService.update(paramProductDto, updateProductDto, images);
   }
 
-  @Get()
-  @ApiOperation({ summary: 'Get all products with pagination and filters' })
-  @ApiQuery(ProductQueryParams.search)
-  @ApiQuery(ProductQueryParams.category)
-  @ApiQuery(ProductQueryParams.inStock)
-  @ApiQuery(ProductQueryParams.page)
-  @ApiQuery(ProductQueryParams.limit)
-  @ApiQuery(ProductQueryParams.sort)
-  @ApiResponse(ProductApiResponses.allProducts)
+  @Get('handle/:handle')
+  @ApiOperation({ summary: 'Get product by handle/slug' })
+  @ApiParam(ProductPathParams.handle)
+  @ApiResponse(ProductApiResponses.singleProduct)
   @ApiResponse(ProductApiResponses.badRequest)
   @ApiResponse(ProductApiResponses.unauthorized)
-  async getAllProducts(@Query(ValidationPipe) queryProductDto: QueryProductDTO) {
-    return this.productService.getAllProducts(queryProductDto);
+  @ApiResponse(ProductApiResponses.notFound)
+  async getProductByHandle(@Param('handle') handle: string) {
+    return this.productService.getProductByHandle(handle);
   }
 
   @Get(':productId')
@@ -262,15 +463,33 @@ export class ProductController {
     return this.productService.getProduct(paramProductDto);
   }
 
-  @Get('handle/:handle')
-  @ApiOperation({ summary: 'Get product by handle/slug' })
-  @ApiParam(ProductPathParams.handle)
-  @ApiResponse(ProductApiResponses.singleProduct)
+  @Get(':productId/related')
+  @ApiOperation({ summary: 'Get related products' })
+  @ApiParam(ProductPathParams.productId)
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Number of related products to return (default: 4)' })
+  @ApiResponse(ProductApiResponses.allProducts)
+  @ApiResponse(ProductApiResponses.badRequest)
+  @ApiResponse(ProductApiResponses.notFound)
+  async getRelatedProducts(
+    @Param(ValidationPipe) paramProductDto: ParamProductDTO,
+    @Query('limit') limit?: number,
+  ) {
+    return this.productService.getRelatedProducts(paramProductDto, limit);
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Get all products with pagination and filters' })
+  @ApiQuery(ProductQueryParams.search)
+  @ApiQuery(ProductQueryParams.category)
+  @ApiQuery(ProductQueryParams.inStock)
+  @ApiQuery(ProductQueryParams.page)
+  @ApiQuery(ProductQueryParams.limit)
+  @ApiQuery(ProductQueryParams.sort)
+  @ApiResponse(ProductApiResponses.allProducts)
   @ApiResponse(ProductApiResponses.badRequest)
   @ApiResponse(ProductApiResponses.unauthorized)
-  @ApiResponse(ProductApiResponses.notFound)
-  async getProductByHandle(@Param('handle') handle: string) {
-    return this.productService.getProductByHandle(handle);
+  async getAllProducts(@Query(ValidationPipe) queryProductDto: QueryProductDTO) {
+    return this.productService.getAllProducts(queryProductDto);
   }
 
   @Delete(':productId')

@@ -45,7 +45,7 @@ import {
   schema: { default: 'v1' },
 })
 @UsePipes(new ValidationPipe({ whitelist: true }))
-@Controller('auth')
+@Controller({ path: 'auth', version: '1' })
 export class AuthController {
   constructor(private readonly AuthService: AuthService) {}
 

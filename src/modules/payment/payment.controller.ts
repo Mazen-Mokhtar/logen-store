@@ -20,7 +20,7 @@ import { CheckoutService } from '../checkout/checkout.service';
 import { StripeService } from 'src/commen/service/stripe.service';
 
 @ApiTags('Payment Webhooks')
-@Controller('payment')
+@Controller({ path: 'payment', version: '1' })
 export class PaymentController {
   constructor(
     private readonly checkoutService: CheckoutService,

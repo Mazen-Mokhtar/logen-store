@@ -45,6 +45,16 @@ export interface IProductRatingStats {
   };
 }
 
+export interface IProductWarranty {
+  hasWarranty: boolean;
+  warrantyPeriod?: number; // in months
+  warrantyType?: string; // e.g., 'manufacturer', 'seller', 'extended'
+  warrantyDescription?: {
+    en?: string;
+    ar?: string;
+  };
+}
+
 @Schema({ 
   timestamps: true,
   _id: true,  // تأكيد أن MongoDB سيقوم بإنشاء _id تلقائياً
@@ -72,6 +82,14 @@ export class Product {
 
   @Prop({ type: Number, required: true, min: 0 })
   price: number;
+
+  @Prop({ 
+    type: String, 
+    required: true, 
+    enum: ['USD', 'EUR', 'EGP', 'SAR', 'AED', 'KWD', 'QAR', 'BHD', 'OMR', 'JOD'],
+    default: 'USD'
+  })
+  currency: string;
 
   @Prop([
     raw({
@@ -122,6 +140,23 @@ export class Product {
 
   @Prop({ type: String, required: true })
   folderId: string;
+
+  @Prop(
+    raw({
+      hasWarranty: { type: Boolean, default: false },
+      warrantyPeriod: { type: Number, min: 0 },
+      warrantyType: { 
+        type: String, 
+        enum: ['manufacturer', 'seller', 'extended'],
+        default: 'manufacturer'
+      },
+      warrantyDescription: {
+        en: { type: String },
+        ar: { type: String }
+      }
+    }),
+  )
+  warranty: IProductWarranty;
 
   // Virtual field for rating statistics (not stored in DB)
   ratingStats?: IProductRatingStats;

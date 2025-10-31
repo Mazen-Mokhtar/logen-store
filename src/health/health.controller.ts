@@ -19,8 +19,7 @@ import { HealthCheckDto } from '../common/dto/common-response.dto';
   required: false,
   schema: { default: 'v1' },
 })
-@Controller('health')
-@ApiVersion('v1', 'v2')
+@Controller({ path: 'health', version: '1' })
 export class HealthController {
   constructor(private readonly healthService: HealthService) {}
 

@@ -37,6 +37,7 @@ import {
   QueryCategoryDTO,
   UpdateCategoryDTO,
 } from './dto/index';
+import { CATEGORY_CONSTANTS } from './category.constants';
 
 @ApiTags('Categories')
 @ApiHeader({
@@ -46,7 +47,7 @@ import {
   schema: { default: 'v1' },
 })
 @UsePipes(new ValidationPipe({ whitelist: true }))
-@Controller('category')
+@Controller({ path: CATEGORY_CONSTANTS.BASE_PATH, version: CATEGORY_CONSTANTS.API_VERSION })
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
   @ApiOperation({

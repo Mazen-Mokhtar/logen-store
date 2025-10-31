@@ -18,6 +18,14 @@ export class AddToCartDto {
   @Min(0)
   price: number;
 
+  @ApiProperty({ 
+    description: 'Product currency',
+    enum: ['USD', 'EUR', 'EGP', 'SAR', 'AED', 'KWD', 'QAR', 'BHD', 'OMR', 'JOD'],
+    default: 'USD'
+  })
+  @IsString()
+  currency: string;
+
   @ApiProperty({ description: 'Product image URL' })
   @IsNotEmpty()
   @IsString()
@@ -89,6 +97,9 @@ export class CartItemResponseDto {
 
   @ApiProperty({ description: 'Product price' })
   price: number;
+
+  @ApiProperty({ description: 'Product currency' })
+  currency: string;
 
   @ApiProperty({ description: 'Product image URL' })
   image: string;

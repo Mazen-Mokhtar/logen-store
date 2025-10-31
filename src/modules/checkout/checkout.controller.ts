@@ -24,7 +24,7 @@ import { User } from 'src/commen/Decorator/user.decorator';
 import { TUser } from 'src/DB/models/User/user.schema';
 
 @ApiTags('Checkout')
-@Controller('checkout')
+@Controller({ path: 'checkout', version: '1' })
 export class CheckoutController {
   constructor(private readonly checkoutService: CheckoutService) {}
 

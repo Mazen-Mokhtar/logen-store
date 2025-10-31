@@ -33,7 +33,7 @@ import { UrlManagementService, IRedirectRule } from './url-management.service';
 import { LocaleService } from './locale.service';
 
 @ApiTags('SEO')
-@Controller('seo')
+@Controller({ path: 'seo', version: '1' })
 export class SeoController {
   private readonly logger = new Logger(SeoController.name);
 

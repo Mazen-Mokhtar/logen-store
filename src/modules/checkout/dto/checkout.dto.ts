@@ -23,7 +23,15 @@ export enum PaymentMethod {
 
 export enum Currency {
   USD = 'USD',
+  EUR = 'EUR',
   EGP = 'EGP',
+  SAR = 'SAR',
+  AED = 'AED',
+  KWD = 'KWD',
+  QAR = 'QAR',
+  BHD = 'BHD',
+  OMR = 'OMR',
+  JOD = 'JOD',
 }
 
 export class CartItemDTO {
@@ -42,6 +50,15 @@ export class CartItemDTO {
   @IsNumber()
   @IsPositive()
   price: number;
+
+  @ApiProperty({ 
+    description: 'Product currency',
+    enum: Currency,
+    default: Currency.USD
+  })
+  @IsEnum(Currency)
+  @IsOptional()
+  currency?: Currency;
 
   @ApiProperty({ description: 'Product image URL' })
   @IsString()

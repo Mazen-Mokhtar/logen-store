@@ -3,7 +3,7 @@ config();
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as express from 'express';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { AllExceptionsFilter } from './commen/filters/http-exception.filter';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
@@ -70,6 +70,11 @@ async function bootstrap() {
 
   // Set global prefix for all routes
   app.setGlobalPrefix('api');
+
+  // Enable versioning
+  app.enableVersioning({
+    type: VersioningType.URI,
+  });
 
   // Global exception filter
   app.useGlobalFilters(new AllExceptionsFilter());

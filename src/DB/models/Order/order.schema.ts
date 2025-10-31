@@ -17,6 +17,7 @@ export interface CartItem {
   id: string;
   title: string;
   price: number;
+  currency?: string;
   image: string;
   quantity: number;
   size?: string;
@@ -50,6 +51,7 @@ export class Order {
       id: String,
       title: String,
       price: Number,
+      currency: { type: String, required: false },
       image: String,
       quantity: Number,
       size: { type: String, required: false },

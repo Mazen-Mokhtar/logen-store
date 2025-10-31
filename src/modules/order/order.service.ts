@@ -87,6 +87,9 @@ export class OrderService {
       }
     }
 
+    // Determine order currency from cart items (use first item's currency or default to EGP)
+    const orderCurrency = body.items[0]?.currency || Currency.EGP;
+
     // Create order data
     const orderData: any = {
       userId: user._id,
@@ -97,7 +100,7 @@ export class OrderService {
       shipping: body.shipping,
       tax: body.tax,
       totalAmount: finalAmount,
-      currency: Currency.EGP,
+      currency: orderCurrency,
       paymentMethod: body.paymentMethod,
       status: OrderStatus.PENDING,
       adminNote: body.note,

@@ -21,6 +21,12 @@ const productProperties = {
     },
   },
   price: { type: 'number', description: 'Product price' },
+  currency: { 
+    type: 'string', 
+    description: 'Product currency',
+    enum: ['USD', 'EUR', 'EGP', 'SAR', 'AED', 'KWD', 'QAR', 'BHD', 'OMR', 'JOD'],
+    default: 'USD'
+  },
   category: { type: 'string', description: 'Category ID' },
   tags: { type: 'array', items: { type: 'string' } },
   inStock: { type: 'boolean', description: 'Stock availability' },
@@ -64,6 +70,25 @@ const productProperties = {
       },
     },
   },
+  warranty: {
+    type: 'object',
+    properties: {
+      hasWarranty: { type: 'boolean', description: 'Whether product has warranty' },
+      warrantyPeriod: { type: 'number', description: 'Warranty period in months' },
+      warrantyType: { 
+        type: 'string', 
+        enum: ['manufacturer', 'seller', 'extended'],
+        description: 'Type of warranty'
+      },
+      warrantyDescription: {
+        type: 'object',
+        properties: {
+          en: { type: 'string', description: 'English warranty description' },
+          ar: { type: 'string', description: 'Arabic warranty description' },
+        },
+      },
+    },
+  },
   createdBy: { type: 'string', description: 'Creator ID' },
   createdAt: { type: 'string', format: 'date-time' },
   updatedAt: { type: 'string', format: 'date-time' },
@@ -87,7 +112,7 @@ export const ProductSwaggerSchemas = {
           description: 'Product images (max 10 files)',
         },
       },
-      required: ['handle', 'title', 'description', 'price', 'category', 'images'],
+      required: ['handle', 'title', 'description', 'price', 'currency', 'category', 'images'],
     },
   },
 
@@ -100,12 +125,14 @@ export const ProductSwaggerSchemas = {
         title: productProperties.title,
         description: productProperties.description,
         price: productProperties.price,
+        currency: productProperties.currency,
         category: productProperties.category,
         tags: productProperties.tags,
         inStock: productProperties.inStock,
         promotion: productProperties.promotion,
         sizes: productProperties.sizes,
         colors: productProperties.colors,
+        warranty: productProperties.warranty,
         images: {
           type: 'array',
           items: { type: 'string', format: 'binary' },
@@ -122,9 +149,19 @@ export const ProductSwaggerSchemas = {
     title: { en: 'Product Title', ar: 'عنوان المنتج' },
     description: { en: 'Product Description', ar: 'وصف المنتج' },
     price: 99.99,
+    currency: 'USD',
     images: [{ secure_url: 'image_url', public_id: 'image_id' }],
     category: { _id: 'category_id', name: 'Category Name' },
     inStock: true,
+    warranty: {
+      hasWarranty: true,
+      warrantyPeriod: 12,
+      warrantyType: 'manufacturer',
+      warrantyDescription: {
+        en: '1 year manufacturer warranty',
+        ar: 'ضمان الشركة المصنعة لمدة سنة واحدة'
+      }
+    },
     createdAt: '2024-01-15T10:30:00.000Z',
   },
 
@@ -134,10 +171,20 @@ export const ProductSwaggerSchemas = {
     title: { en: 'Product Title', ar: 'عنوان المنتج' },
     description: { en: 'Product Description', ar: 'وصف المنتج' },
     price: 99.99,
+    currency: 'USD',
     images: [{ secure_url: 'image_url', public_id: 'image_id' }],
     category: { _id: 'category_id', name: 'Category Name' },
     createdBy: { _id: 'user_id', userName: 'admin' },
     inStock: true,
+    warranty: {
+      hasWarranty: true,
+      warrantyPeriod: 24,
+      warrantyType: 'extended',
+      warrantyDescription: {
+        en: '2 years extended warranty',
+        ar: 'ضمان ممتد لمدة سنتين'
+      }
+    },
     createdAt: '2024-01-15T10:30:00.000Z',
   },
 };

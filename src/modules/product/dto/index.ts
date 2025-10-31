@@ -88,6 +88,39 @@ export class ProductColorDTO {
   available?: boolean = true;
 }
 
+export class ProductWarrantyDescriptionDTO {
+  @IsString()
+  @MinLength(1)
+  @MaxLength(500)
+  @IsOptional()
+  en?: string;
+
+  @IsString()
+  @MinLength(1)
+  @MaxLength(500)
+  @IsOptional()
+  ar?: string;
+}
+
+export class ProductWarrantyDTO {
+  @IsBoolean()
+  hasWarranty: boolean;
+
+  @IsNumber()
+  @IsPositive()
+  @IsOptional()
+  warrantyPeriod?: number; // in months
+
+  @IsString()
+  @IsOptional()
+  warrantyType?: 'manufacturer' | 'seller' | 'extended';
+
+  @ValidateNested()
+  @Type(() => ProductWarrantyDescriptionDTO)
+  @IsOptional()
+  warrantyDescription?: ProductWarrantyDescriptionDTO;
+}
+
 export class CreateProductDTO {
   @IsString()
   @MinLength(2)
@@ -126,6 +159,16 @@ export class CreateProductDTO {
   @IsPositive()
   @Type(() => Number)
   price: number;
+
+  @IsString()
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      return value.toUpperCase();
+    }
+    return value;
+  })
+  currency?: string;
 
   @IsArray()
   @IsString({ each: true })
@@ -186,19 +229,107 @@ export class CreateProductDTO {
   sizes?: ProductSizeDTO[];
 
   @IsArray()
-  // @IsString({ each: true })
+  @ValidateNested({ each: true })
+  @Type(() => ProductColorDTO)
   @IsOptional()
   @Transform(({ value }) => {
     if (typeof value === 'string') {
       try {
         return JSON.parse(value);
       } catch {
-        return [value];
+        return [];
       }
     }
-    return value;
+    return value || [];
   })
   colors?: ProductColorDTO[];
+
+  @ValidateNested()
+  @Type(() => ProductWarrantyDTO)
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      try {
+        return JSON.parse(value);
+      } catch {
+        return { hasWarranty: false };
+      }
+    }
+    return value || { hasWarranty: false };
+  })
+  warranty?: ProductWarrantyDTO;
+}
+
+// DTO for bulk product creation with pre-uploaded images
+export class BulkCreateProductItemDTO {
+  @IsString()
+  @MinLength(2)
+  @MaxLength(200)
+  handle: string;
+
+  @IsString()
+  @MinLength(2)
+  @MaxLength(500)
+  title: string;
+
+  @IsString()
+  @MinLength(10)
+  @MaxLength(2000)
+  description: string;
+
+  @IsNumber()
+  @IsPositive()
+  @Type(() => Number)
+  price: number;
+
+  @IsString()
+  @IsOptional()
+  currency?: string;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  tags?: string[];
+
+  @IsString()
+  category: string;
+
+  @IsBoolean()
+  @IsOptional()
+  inStock?: boolean;
+
+  @ValidateNested()
+  @Type(() => ProductPromotionDTO)
+  @IsOptional()
+  promotion?: ProductPromotionDTO;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  sizes?: string[];
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  colors?: string[];
+
+  // Array of image URLs (secure_url) - no public_id needed as mentioned by user
+  @IsArray()
+  @IsString({ each: true })
+  @MinLength(1, { each: true })
+  imageUrls: string[];
+
+  @ValidateNested()
+  @Type(() => ProductWarrantyDTO)
+  @IsOptional()
+  warranty?: ProductWarrantyDTO;
+}
+
+export class BulkCreateProductDTO {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => BulkCreateProductItemDTO)
+  products: BulkCreateProductItemDTO[];
 }
 
 export class UpdateProductDTO extends PartialType(CreateProductDTO) { }

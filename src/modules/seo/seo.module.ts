@@ -60,14 +60,7 @@ import { SeoRedirectMiddleware } from './middleware/seo-redirect.middleware';
 })
 export class SeoModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    // Apply SEO middleware in the correct order
-    // 1. Redirects first (to handle URL canonicalization)
-    // 2. Meta injection second (for pages that aren't redirected)
-    
-    consumer
-      .apply(SeoRedirectMiddleware)
-      .forRoutes('*'); // Apply to all routes
-    
+    // Apply SEO meta middleware only (redirect middleware is handled globally in app.module.ts)
     consumer
       .apply(SeoMetaMiddleware)
       .forRoutes('*'); // Apply to all routes

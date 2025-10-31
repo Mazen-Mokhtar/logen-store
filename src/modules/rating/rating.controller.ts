@@ -37,7 +37,7 @@ import {
 import { ApiResponseDto } from 'src/common/dto/common-response.dto';
 
 @ApiTags('Reviews')
-@Controller('ratings')
+@Controller({ path: 'ratings', version: '1' })
 @UseInterceptors(RatingSanitizationInterceptor)
 export class RatingController {
   constructor(private readonly ratingService: RatingService) {}

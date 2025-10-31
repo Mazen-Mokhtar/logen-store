@@ -14,7 +14,7 @@ import { User } from 'src/commen/Decorator/user.decorator';
 import { TUser } from 'src/DB/models/User/user.schema';
 
 @ApiTags('Users')
-@Controller('user')
+@Controller({ path: 'user', version: '1' })
 export class userController {
   constructor(private readonly userService: userService) {}
   @ApiOperation({

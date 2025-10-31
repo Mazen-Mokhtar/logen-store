@@ -42,7 +42,7 @@ import {
   schema: { default: 'v1' },
 })
 @UsePipes(new ValidationPipe({ whitelist: true }))
-@Controller('coupon')
+@Controller({ path: 'coupon', version: '1' })
 export class CouponController {
   constructor(private readonly couponService: CouponService) {}
 

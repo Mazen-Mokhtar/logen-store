@@ -118,7 +118,10 @@ import { MonitoringService } from './commen/services/monitoring.service';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    // Apply error handling middleware first, then metrics middleware
+    // Apply SEO redirects middleware FIRST (before any other processing)
+    consumer.apply(SeoRedirectMiddleware).forRoutes('*');
+
+    // Apply error handling middleware, then metrics middleware
     consumer.apply(ErrorHandlingMiddleware).forRoutes('*');
     consumer.apply(MetricsMiddleware).forRoutes('*');
 
@@ -127,9 +130,6 @@ export class AppModule implements NestModule {
 
     // Apply sanitization middleware to all routes
     consumer.apply(SanitizationMiddleware).forRoutes('*');
-
-    // Apply SEO redirects middleware (before other processing)
-    consumer.apply(SeoRedirectMiddleware).forRoutes('*');
 
     // Apply SEO meta injection middleware
     consumer.apply(SeoMetaMiddleware).forRoutes('*');

@@ -72,6 +72,7 @@ export class CheckoutService {
         id: item.id,
         title: item.title,
         price: item.price,
+        currency: item.currency || checkoutData.currency,
         quantity: item.quantity,
         image: item.image || '',
         size: item.size,

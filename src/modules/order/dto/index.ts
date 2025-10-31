@@ -39,6 +39,10 @@ export class CartItemDTO {
   price: number;
 
   @IsString()
+  @IsOptional()
+  currency?: string;
+
+  @IsString()
   @MinLength(1)
   @MaxLength(500)
   image: string;

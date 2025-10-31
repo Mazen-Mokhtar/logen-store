@@ -16,20 +16,27 @@ export class SeoRedirectMiddleware implements NestMiddleware {
   }
 
   async use(req: Request, res: Response, next: NextFunction): Promise<void> {
+    this.logger.log(`Processing request: ${req.method} ${req.path}`);
+    
     // Skip if redirects are disabled
     if (!this.enableRedirects) {
+      this.logger.log('Redirects disabled, skipping');
       return next();
     }
 
     // Skip for non-GET requests
     if (req.method !== 'GET') {
+      this.logger.log(`Skipping non-GET request: ${req.method}`);
       return next();
     }
 
     // Skip for API routes and static files
     if (this.shouldSkipRoute(req.path)) {
+      this.logger.log(`Skipping route: ${req.path}`);
       return next();
     }
+
+    this.logger.log(`Checking redirects for: ${req.path}`);
 
     try {
       const redirectUrl = await this.determineRedirect(req);
@@ -204,6 +211,25 @@ export class SeoRedirectMiddleware implements NestMiddleware {
       };
     }
 
+    // Redirect API endpoints to versioned endpoints
+    if (path.startsWith('/api/products')) {
+      const queryString = Object.keys(query).length > 0 ? '?' + new URLSearchParams(query as any).toString() : '';
+      return {
+        to: `/api/v1/products${queryString}`,
+        statusCode: 301,
+        reason: 'Redirect to versioned API endpoint',
+      };
+    }
+
+    if (path.startsWith('/api/category')) {
+      const queryString = Object.keys(query).length > 0 ? '?' + new URLSearchParams(query as any).toString() : '';
+      return {
+        to: `/api/v1/category${queryString}`,
+        statusCode: 301,
+        reason: 'Redirect to versioned API endpoint',
+      };
+    }
+
     // Redirect common misspellings or old paths
     const commonRedirects: { [key: string]: string } = {
       '/home': '/',
@@ -266,7 +292,7 @@ export class SeoRedirectMiddleware implements NestMiddleware {
    */
   private shouldSkipRoute(path: string): boolean {
     const skipPatterns = [
-      '/api/',
+      '/api/v1/', // Skip versioned API routes
       '/admin/',
       '/auth/',
       '/health',

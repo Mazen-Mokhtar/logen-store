@@ -55,8 +55,7 @@ import {
   required: false,
 })
 @UsePipes(new ValidationPipe({ whitelist: false, transform: true }))
-@Controller('order')
-@ApiVersion('v1', 'v2')
+@Controller({ path: 'order', version: '1' })
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
